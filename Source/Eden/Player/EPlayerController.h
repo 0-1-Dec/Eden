@@ -16,4 +16,5 @@ class EDEN_API AEPlayerController : public APlayerController
 	
 protected:
 	virtual void BeginPlay() override;
+
 };
