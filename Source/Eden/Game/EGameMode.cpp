@@ -7,6 +7,7 @@
 
 AEGameMode::AEGameMode()
 {
+	// 폰 클래스 지정
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Game/Eden/Blueprints/BP_ECharacterPlayer.BP_ECharacterPlayer_C"));
 	if (DefaultPawnClassRef.Class)
 	{
