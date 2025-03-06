@@ -44,6 +44,12 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		LookAction = InputActionLookRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Attack.IA_Attack'"));
+	if (nullptr != InputActionAttackRef.Object)
+	{
+		AttackAction = InputActionAttackRef.Object;
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -69,6 +75,7 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Look);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Attack);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -92,4 +99,9 @@ void AECharacterPlayer::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
 
+}
+
+void AECharacterPlayer::Attack()
+{
+	ProcessComboCommand();
 }

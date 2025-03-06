@@ -7,19 +7,13 @@
 
 AEGameMode::AEGameMode()
 {
-	//static ConstructorHelpers::FClassFinder<APawn> ThirdPersonClassRef(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_c"));
-	//if (ThirdPersonClassRef.Class)
-	//{
-		//DefaultPawnClass = ThirdPersonClassRef.Class;
-	//}
-	//DefaultPawnClass
-	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/Eden.ECharacterPlayer"));
+	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Game/Eden/Blueprints/BP_ECharacterPlayer.BP_ECharacterPlayer_C"));
 	if (DefaultPawnClassRef.Class)
 	{
 		DefaultPawnClass = DefaultPawnClassRef.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Script/Eden.EPlayerController"));
+	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Game/Eden/Blueprints/BP_ECharacterController.BP_ECharacterController_C"));
 	if (PlayerControllerClassRef.Class)
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;
