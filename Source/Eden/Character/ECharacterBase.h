@@ -18,6 +18,8 @@ public:
 	// 생성자: 이 캐릭터 클래스의 기본 속성 값들을 초기화합니다.
 	AECharacterBase();
 
+	virtual void PostInitializeComponents() override;
+
 	// =========================================================================================
 	// 콤보 애니메이션 섹션
 	// =========================================================================================
@@ -75,6 +77,18 @@ protected:
 	// EventInstigator: 공격을 발생시킨 컨트롤러
 	// DamageCauser: 피해를 입힌 액터
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	// =========================================================================================
+	// Dead 애니메이션 섹션
+	// =========================================================================================
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> DeadMontage;
+
+	virtual void SetDead();
+	void PlayDeadAnimation();
+
+	float DeadEventDelayTime = 5.0f;
 
 	// =========================================================================================
 	// 스탯 섹션
