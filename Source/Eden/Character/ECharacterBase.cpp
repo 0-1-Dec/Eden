@@ -60,8 +60,21 @@ AECharacterBase::AECharacterBase()
 		ComboActionData = ComboActionDataRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/AM_Dead.AM_Dead'"));
+	if (DeadMontageRef.Object)
+	{
+		DeadMontage = DeadMontageRef.Object;
+	}
+
 	// 스탯 컴포넌트
 	Stat = CreateDefaultSubobject<UECharacterStatComponent>(TEXT("Stat"));
+}
+
+void AECharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	Stat->OnHpZero.AddUObject(this, &AECharacterBase::SetDead);
 }
 
 // ProcessComboCommand: 콤보 커맨드를 처리하는 함수입니다.
@@ -232,4 +245,18 @@ float AECharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 
 	// 적용된 데미지 값을 반환합니다.
 	return DamageAmount;
+}
+
+void AECharacterBase::SetDead()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	PlayDeadAnimation();
+	SetActorEnableCollision(false);
+}
+
+void AECharacterBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 }

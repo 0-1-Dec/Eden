@@ -16,4 +16,7 @@ class EDEN_API AECharacterNonPlayer : public AECharacterBase
 	
 public:
 	AECharacterNonPlayer();
+
+protected:
+	void SetDead() override;
 };
