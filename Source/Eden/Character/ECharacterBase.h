@@ -1,85 +1,109 @@
-// ÇÁ·ÎÁ§Æ® ¼³Á¤ÀÇ Description ÆäÀÌÁö¿¡¼­ ÀúÀÛ±Ç Á¤º¸¸¦ ÀÛ¼ºÇÏ¼¼¿ä.
+// í”„ë¡œì íŠ¸ ì„¤ì •ì˜ Description í˜ì´ì§€ì—ì„œ ì €ì‘ê¶Œ ì •ë³´ë¥¼ ì‘ì„±í•˜ì„¸ìš”.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/EAnimationAttackInterface.h"
+#include "Animation/EWeaponType.h"
 #include "ECharacterBase.generated.h"
 
-// AECharacterBase Å¬·¡½º´Â ACharacter¸¦ »ó¼Ó¹Ş¾Æ °ÔÀÓ Ä³¸¯ÅÍÀÇ ±âº» µ¿ÀÛÀ» ±¸ÇöÇÏ¸ç,
-// IEAnimationAttackInterface¸¦ ±¸ÇöÇÏ¿© ¾Ö´Ï¸ŞÀÌ¼Ç °ø°İ °ü·Ã ±â´ÉÀ» Á¦°øÇÕ´Ï´Ù.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponTypeChangedDelegate, EWeaponType, NewWeaponType);
+
+// AECharacterBase í´ë˜ìŠ¤ëŠ” ACharacterë¥¼ ìƒì†ë°›ì•„ ê²Œì„ ìºë¦­í„°ì˜ ê¸°ë³¸ ë™ì‘ì„ êµ¬í˜„í•˜ë©°,
+// IEAnimationAttackInterfaceë¥¼ êµ¬í˜„í•˜ì—¬ ì• ë‹ˆë©”ì´ì…˜ ê³µê²© ê´€ë ¨ ê¸°ëŠ¥ì„ ì œê³µí•©ë‹ˆë‹¤.
 UCLASS()
 class EDEN_API AECharacterBase : public ACharacter, public IEAnimationAttackInterface
 {
 	GENERATED_BODY()
 
 public:
-	// »ı¼ºÀÚ: ÀÌ Ä³¸¯ÅÍ Å¬·¡½ºÀÇ ±âº» ¼Ó¼º °ªµéÀ» ÃÊ±âÈ­ÇÕ´Ï´Ù.
+	// ìƒì„±ì: ì´ ìºë¦­í„° í´ë˜ìŠ¤ì˜ ê¸°ë³¸ ì†ì„± ê°’ë“¤ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
 	AECharacterBase();
 
 	virtual void PostInitializeComponents() override;
 
+public:
+	FOnWeaponTypeChangedDelegate OnWeaponTypeChanged;
+
+	// ë¬´ê¸° ìƒíƒœ ê´€ë¦¬
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	EWeaponType CurrentWeaponType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TMap<EWeaponType, UAnimMontage*> WeaponMontages;
+
+	void SetWeaponType(EWeaponType NewWeaponType);
+
 	// =========================================================================================
-	// ÄŞº¸ ¾Ö´Ï¸ŞÀÌ¼Ç ¼½¼Ç
+	// ì½¤ë³´ ì• ë‹ˆë©”ì´ì…˜ ì„¹ì…˜
 	// =========================================================================================
 protected:
-	// ComboActionMontage:
-	// ºí·çÇÁ¸°Æ®³ª ¿¡µğÅÍ¿¡¼­ ¼öÁ¤ÇÒ ¼ö ÀÖÀ¸¸ç, ÄŞº¸ ¾×¼Ç¿¡ »ç¿ëµÇ´Â ¾Ö´Ï¸ŞÀÌ¼Ç ¸ùÅ¸ÁÖ¸¦ ÀúÀåÇÕ´Ï´Ù.
+	// ë¸”ë£¨í”„ë¦°íŠ¸ë‚˜ ì—ë””í„°ì—ì„œ ìˆ˜ì •í•  ìˆ˜ ìˆìœ¼ë©°, ì½¤ë³´ ì•¡ì…˜ì— ì‚¬ìš©ë˜ëŠ” ì• ë‹ˆë©”ì´ì…˜ ëª½íƒ€ì£¼ë¥¼ ì €ì¥í•©ë‹ˆë‹¤.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
 
 	// ComboActionData:
-	// ÄŞº¸ °ø°İ°ú °ü·ÃµÈ µ¥ÀÌÅÍ¸¦ ÀúÀåÇÏ´Â °´Ã¼·Î, ¿¡µğÅÍ¿¡¼­ ¼³Á¤ °¡´ÉÇÏÁö¸¸ ºí·çÇÁ¸°Æ®¿¡¼­´Â ÀĞ±â Àü¿ëÀÔ´Ï´Ù.
-	// Meta ¼Ó¼º AllowPrivateAccess´Â ³»ºÎ Á¢±Ù ±ÇÇÑÀ» Çã¿ëÇÕ´Ï´Ù.
+	// ì½¤ë³´ ê³µê²©ê³¼ ê´€ë ¨ëœ ë°ì´í„°ë¥¼ ì €ì¥í•˜ëŠ” ê°ì²´ë¡œ, ì—ë””í„°ì—ì„œ ì„¤ì • ê°€ëŠ¥í•˜ì§€ë§Œ ë¸”ë£¨í”„ë¦°íŠ¸ì—ì„œëŠ” ì½ê¸° ì „ìš©ì…ë‹ˆë‹¤.
+	// Meta ì†ì„± AllowPrivateAccessëŠ” ë‚´ë¶€ ì ‘ê·¼ ê¶Œí•œì„ í—ˆìš©í•©ë‹ˆë‹¤.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UEComboActionData> ComboActionData;
 
-	// ÄŞº¸ ¸í·ÉÀ» Ã³¸®ÇÏ´Â ÇÔ¼ö: ÇÃ·¹ÀÌ¾îÀÇ ÀÔ·Â¿¡ µû¸¥ ÄŞº¸ ¿¬°è Ã³¸®¸¦ ¼öÇàÇÕ´Ï´Ù.
+	// ì½¤ë³´ ëª…ë ¹ì„ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜: í”Œë ˆì´ì–´ì˜ ì…ë ¥ì— ë”°ë¥¸ ì½¤ë³´ ì—°ê³„ ì²˜ë¦¬ë¥¼ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 	void ProcessComboCommand();
 
-	// ÄŞº¸ ¾×¼Ç ½ÃÀÛ ÇÔ¼ö: ÄŞº¸ °ø°İÀÇ ½ÃÀÛ ½Ã È£ÃâµÇ¾î ¾Ö´Ï¸ŞÀÌ¼Ç µîÀ» ÃÊ±âÈ­ÇÕ´Ï´Ù.
+	// ì½¤ë³´ ì•¡ì…˜ ì‹œì‘ í•¨ìˆ˜: ì½¤ë³´ ê³µê²©ì˜ ì‹œì‘ ì‹œ í˜¸ì¶œë˜ì–´ ì• ë‹ˆë©”ì´ì…˜ ë“±ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
 	void ComboActionBegin();
 
-	// ÄŞº¸ ¾×¼Ç Á¾·á ÇÔ¼ö:
-	// TargetMontage: Á¾·áµÉ ¾Ö´Ï¸ŞÀÌ¼Ç ¸ùÅ¸ÁÖ
-	// IsProperlyEnded: Á¤»óÀûÀ¸·Î Á¾·áµÇ¾ú´ÂÁö ¿©ºÎ¸¦ ÆÇ´ÜÇÕ´Ï´Ù.
+	// ì½¤ë³´ ì•¡ì…˜ ì¢…ë£Œ í•¨ìˆ˜:
+	// TargetMontage: ì¢…ë£Œë  ì• ë‹ˆë©”ì´ì…˜ ëª½íƒ€ì£¼
+	// IsProperlyEnded: ì •ìƒì ìœ¼ë¡œ ì¢…ë£Œë˜ì—ˆëŠ”ì§€ ì—¬ë¶€ë¥¼ íŒë‹¨í•©ë‹ˆë‹¤.
 	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
 
-	// ÄŞº¸ ¾×¼Ç Á¾·á¸¦ ¾Ë¸®´Â °¡»ó ÇÔ¼ö:
-	// ÆÄ»ı Å¬·¡½º¿¡¼­ ÄŞº¸ Á¾·á ÈÄÀÇ Ãß°¡ Ã³¸®°¡ ÇÊ¿äÇÒ °æ¿ì ¿À¹ö¶óÀÌµå ÇÒ ¼ö ÀÖ½À´Ï´Ù.
+	// ì½¤ë³´ ì•¡ì…˜ ì¢…ë£Œë¥¼ ì•Œë¦¬ëŠ” ê°€ìƒ í•¨ìˆ˜:
+	// íŒŒìƒ í´ë˜ìŠ¤ì—ì„œ ì½¤ë³´ ì¢…ë£Œ í›„ì˜ ì¶”ê°€ ì²˜ë¦¬ê°€ í•„ìš”í•  ê²½ìš° ì˜¤ë²„ë¼ì´ë“œ í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
 	virtual void NotifyComboActionEnd();
 
-	// ÄŞº¸ ÀÔ·Â Å¸ÀÌ¹ÖÀ» È®ÀÎÇÏ±â À§ÇÑ Å¸ÀÌ¸Ó ¼³Á¤ ÇÔ¼ö.
+	// ì½¤ë³´ ì…ë ¥ íƒ€ì´ë°ì„ í™•ì¸í•˜ê¸° ìœ„í•œ íƒ€ì´ë¨¸ ì„¤ì • í•¨ìˆ˜.
 	void SetComboCheckTimer();
 
-	// Å¸ÀÌ¸Ó°¡ ¸¸·áµÇ¾úÀ» ¶§ ÄŞº¸ »óÅÂ¸¦ È®ÀÎÇÏ´Â ÇÔ¼ö.
+	// íƒ€ì´ë¨¸ê°€ ë§Œë£Œë˜ì—ˆì„ ë•Œ ì½¤ë³´ ìƒíƒœë¥¼ í™•ì¸í•˜ëŠ” í•¨ìˆ˜.
 	void ComboCheck();
 
-	// ÇöÀç ÁøÇà ÁßÀÎ ÄŞº¸ÀÇ È½¼ö¸¦ ÀúÀåÇÕ´Ï´Ù.
+	// í˜„ì¬ ì§„í–‰ ì¤‘ì¸ ì½¤ë³´ì˜ íšŸìˆ˜ë¥¼ ì €ì¥í•©ë‹ˆë‹¤.
 	int32 CurrentCombo = 0;
 
-	// ÄŞº¸ Å¸ÀÌ¹Ö Ã¼Å©¸¦ À§ÇÑ Å¸ÀÌ¸Ó ÇÚµé.
+	// ì½¤ë³´ íƒ€ì´ë° ì²´í¬ë¥¼ ìœ„í•œ íƒ€ì´ë¨¸ í•¸ë“¤.
 	FTimerHandle ComboTimerHandle;
 
-	// ´ÙÀ½ ÄŞº¸ ¸í·ÉÀÌ ÀÔ·ÂµÇ¾ú´ÂÁö ¿©ºÎ¸¦ ÆÇ´ÜÇÏ´Â ÇÃ·¡±×.
+	// ë‹¤ìŒ ì½¤ë³´ ëª…ë ¹ì´ ì…ë ¥ë˜ì—ˆëŠ”ì§€ ì—¬ë¶€ë¥¼ íŒë‹¨í•˜ëŠ” í”Œë˜ê·¸.
 	bool HasNextComboCommand = false;
 
 	// =========================================================================================
-	// °ø°İ °ü¸® ÇÔ¼ö
+	// ê³µê²© ê´€ë¦¬ í•¨ìˆ˜
 	// =========================================================================================
 protected:
-	// °ø°İ ÆÇÁ¤ ÇÔ¼ö: Ä³¸¯ÅÍÀÇ °ø°İÀÌ »ó´ë¿¡°Ô ÀûÁßÇß´ÂÁö È®ÀÎÇÏ´Â ±â´ÉÀ» ¼öÇàÇÕ´Ï´Ù.
-	// IEAnimationAttackInterface ¶Ç´Â ACharacterÀÇ ±âº» ÇÔ¼ö¸¦ ¿À¹ö¶óÀÌµå ÇÕ´Ï´Ù.
+	// ê³µê²© íŒì • í•¨ìˆ˜: ìºë¦­í„°ì˜ ê³µê²©ì´ ìƒëŒ€ì—ê²Œ ì ì¤‘í–ˆëŠ”ì§€ í™•ì¸í•˜ëŠ” ê¸°ëŠ¥ì„ ìˆ˜í–‰í•©ë‹ˆë‹¤.
+	// IEAnimationAttackInterface ë˜ëŠ” ACharacterì˜ ê¸°ë³¸ í•¨ìˆ˜ë¥¼ ì˜¤ë²„ë¼ì´ë“œ í•©ë‹ˆë‹¤.
 	virtual void AttackHitCheck() override;
 
-	// ÇÇÇØ Ã³¸® ÇÔ¼ö: Ä³¸¯ÅÍ°¡ ÇÇÇØ¸¦ ÀÔ¾úÀ» ¶§, ÇÇÇØ·® °è»ê ¹× Ã³¸®¸¦ ¼öÇàÇÕ´Ï´Ù.
-	// EventInstigator: °ø°İÀ» ¹ß»ı½ÃÅ² ÄÁÆ®·Ñ·¯
-	// DamageCauser: ÇÇÇØ¸¦ ÀÔÈù ¾×ÅÍ
+	// í”¼í•´ ì²˜ë¦¬ í•¨ìˆ˜: ìºë¦­í„°ê°€ í”¼í•´ë¥¼ ì…ì—ˆì„ ë•Œ, í”¼í•´ëŸ‰ ê³„ì‚° ë° ì²˜ë¦¬ë¥¼ ìˆ˜í–‰í•©ë‹ˆë‹¤.
+	// EventInstigator: ê³µê²©ì„ ë°œìƒì‹œí‚¨ ì»¨íŠ¸ë¡¤ëŸ¬
+	// DamageCauser: í”¼í•´ë¥¼ ì…íŒ ì•¡í„°
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	// =========================================================================================
-	// Dead ¾Ö´Ï¸ŞÀÌ¼Ç ¼½¼Ç
+	// í™œ ê´€ë ¨ ì„¹ì…˜
+	// =========================================================================================
+protected:
+	TSubclassOf<class AEArrow> ArrowBP;
+
+	virtual void ShootArrow() override;
+
+
+	// =========================================================================================
+	// Dead ì• ë‹ˆë©”ì´ì…˜ ì„¹ì…˜
 	// =========================================================================================
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
@@ -91,12 +115,12 @@ protected:
 	float DeadEventDelayTime = 5.0f;
 
 	// =========================================================================================
-	// ½ºÅÈ ¼½¼Ç
+	// ìŠ¤íƒ¯ ì„¹ì…˜
 	// =========================================================================================
 protected:
 	// Stat:
-	// Ä³¸¯ÅÍÀÇ ½ºÅÈ(¿¹: Ã¼·Â, °ø°İ·Â µî)À» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®·Î,
-	// ¿¡µğÅÍ¿¡¼­ º¼ ¼ö ÀÖÀ¸³ª ºí·çÇÁ¸°Æ®¿¡¼­´Â ÀĞ±â Àü¿ëÀ¸·Î ¼³Á¤µÇ¾î ÀÖ½À´Ï´Ù.
+	// ìºë¦­í„°ì˜ ìŠ¤íƒ¯(ì˜ˆ: ì²´ë ¥, ê³µê²©ë ¥ ë“±)ì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ë¡œ,
+	// ì—ë””í„°ì—ì„œ ë³¼ ìˆ˜ ìˆìœ¼ë‚˜ ë¸”ë£¨í”„ë¦°íŠ¸ì—ì„œëŠ” ì½ê¸° ì „ìš©ìœ¼ë¡œ ì„¤ì •ë˜ì–´ ìˆìŠµë‹ˆë‹¤.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPricateAccess = "true"))
 	TObjectPtr<class UECharacterStatComponent> Stat;
 };

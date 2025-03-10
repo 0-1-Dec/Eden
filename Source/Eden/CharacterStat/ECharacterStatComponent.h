@@ -1,4 +1,4 @@
-// ÇÁ·ÎÁ§Æ® ¼³Á¤ÀÇ Description ÆäÀÌÁö¿¡¼­ ÀúÀÛ±Ç Á¤º¸¸¦ ÀÛ¼ºÇÏ¼¼¿ä.
+// í”„ë¡œì íŠ¸ ì„¤ì •ì˜ Description íŽ˜ì´ì§€ì—ì„œ ì €ìž‘ê¶Œ ì •ë³´ë¥¼ ìž‘ì„±í•˜ì„¸ìš”.
 
 #pragma once
 
@@ -6,57 +6,57 @@
 #include "Components/ActorComponent.h"
 #include "ECharacterStatComponent.generated.h"
 
-// HP°¡ 0ÀÌ µÇ¾úÀ» ¶§ ¹ß»ýÇÏ´Â ÀÌº¥Æ® µ¨¸®°ÔÀÌÆ® ¼±¾ð
+// HPê°€ 0ì´ ë˜ì—ˆì„ ë•Œ ë°œìƒí•˜ëŠ” ì´ë²¤íŠ¸ ë¸ë¦¬ê²Œì´íŠ¸ ì„ ì–¸
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 
-// HP°¡ º¯°æµÉ ¶§ È£ÃâµÇ¸ç, º¯°æµÈ HP °ªÀ» Àü´ÞÇÏ´Â ÀÌº¥Æ® µ¨¸®°ÔÀÌÆ® ¼±¾ð
+// HPê°€ ë³€ê²½ë  ë•Œ í˜¸ì¶œë˜ë©°, ë³€ê²½ëœ HP ê°’ì„ ì „ë‹¬í•˜ëŠ” ì´ë²¤íŠ¸ ë¸ë¦¬ê²Œì´íŠ¸ ì„ ì–¸
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float)
 
-// UECharacterStatComponent Å¬·¡½º´Â Ä³¸¯ÅÍÀÇ ½ºÅÈ(¿¹: HP, °ø°Ý »ç°Å¸® µî)À» °ü¸®ÇÏ´Â ÄÄÆ÷³ÍÆ®ÀÔ´Ï´Ù.
-// Blueprint¿¡¼­ ½ºÆùÀÌ °¡´ÉÇÏµµ·Ï meta ¼³Á¤À» Æ÷ÇÔÇÏ°í ÀÖ½À´Ï´Ù.
+// UECharacterStatComponent í´ëž˜ìŠ¤ëŠ” ìºë¦­í„°ì˜ ìŠ¤íƒ¯(ì˜ˆ: HP, ê³µê²© ì‚¬ê±°ë¦¬ ë“±)ì„ ê´€ë¦¬í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ìž…ë‹ˆë‹¤.
+// Blueprintì—ì„œ ìŠ¤í°ì´ ê°€ëŠ¥í•˜ë„ë¡ meta ì„¤ì •ì„ í¬í•¨í•˜ê³  ìžˆìŠµë‹ˆë‹¤.
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class EDEN_API UECharacterStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	// »ý¼ºÀÚ: ÄÄÆ÷³ÍÆ®ÀÇ ±âº» ¼Ó¼º °ªÀ» ÃÊ±âÈ­ÇÕ´Ï´Ù.
+	// ìƒì„±ìž: ì»´í¬ë„ŒíŠ¸ì˜ ê¸°ë³¸ ì†ì„± ê°’ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
 	UECharacterStatComponent();
 
 protected:
-	// ÄÄÆ÷³ÍÆ®°¡ ÃÊ±âÈ­µÉ ¶§ È£ÃâµÇ´Â ÇÔ¼ö.
-	// ÃÊ±âÈ­ ÀÛ¾÷ÀÌ³ª ´Ù¸¥ ÄÄÆ÷³ÍÆ®¿ÍÀÇ ¿¬µ¿ ÀÛ¾÷À» ¼öÇàÇÒ ¼ö ÀÖ½À´Ï´Ù.
+	// ì»´í¬ë„ŒíŠ¸ê°€ ì´ˆê¸°í™”ë  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜.
+	// ì´ˆê¸°í™” ìž‘ì—…ì´ë‚˜ ë‹¤ë¥¸ ì»´í¬ë„ŒíŠ¸ì™€ì˜ ì—°ë™ ìž‘ì—…ì„ ìˆ˜í–‰í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤.
 	virtual void InitializeComponent() override;
 
 public:
-	// HP°¡ 0ÀÌ µÇ¾úÀ» ¶§ È£ÃâµÇ´Â µ¨¸®°ÔÀÌÆ® (¿¹: Ä³¸¯ÅÍ »ç¸Á Ã³¸®)
+	// HPê°€ 0ì´ ë˜ì—ˆì„ ë•Œ í˜¸ì¶œë˜ëŠ” ë¸ë¦¬ê²Œì´íŠ¸ (ì˜ˆ: ìºë¦­í„° ì‚¬ë§ ì²˜ë¦¬)
 	FOnHpZeroDelegate OnHpZero;
 
-	// HP°¡ º¯°æµÉ ¶§¸¶´Ù È£ÃâµÇ´Â µ¨¸®°ÔÀÌÆ® (ÆÄ¶ó¹ÌÅÍ: º¯°æµÈ HP °ª)
+	// HPê°€ ë³€ê²½ë  ë•Œë§ˆë‹¤ í˜¸ì¶œë˜ëŠ” ë¸ë¦¬ê²Œì´íŠ¸ (íŒŒë¼ë¯¸í„°: ë³€ê²½ëœ HP ê°’)
 	FOnHpChangedDelegate OnHpChanged;
 
-	// ÀÎ¶óÀÎ ÇÔ¼ö: ÇöÀç HP °ªÀ» ¹ÝÈ¯ÇÕ´Ï´Ù.
+	// ì¸ë¼ì¸ í•¨ìˆ˜: í˜„ìž¬ HP ê°’ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
 
-	// ÀÎ¶óÀÎ ÇÔ¼ö: °ø°Ý »ç°Å¸® °ªÀ» ¹ÝÈ¯ÇÕ´Ï´Ù.
+	// ì¸ë¼ì¸ í•¨ìˆ˜: ê³µê²© ì‚¬ê±°ë¦¬ ê°’ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
 	FORCEINLINE float GetAttackRadius() const { return AttackRadius; }
 
-	// ApplyDamage: ¿ÜºÎ¿¡¼­ µ¥¹ÌÁö¸¦ Àû¿ëÇÒ ¶§ È£ÃâµÇ´Â ÇÔ¼ö.
-	// µ¥¹ÌÁö °ª(InDamage)À» ¹Þ¾Æ HP¸¦ Â÷°¨ÇÏ°í, °ü·Ã ÀÌº¥Æ®¸¦ ¹ß»ý½ÃÅµ´Ï´Ù.
+	// ApplyDamage: ì™¸ë¶€ì—ì„œ ë°ë¯¸ì§€ë¥¼ ì ìš©í•  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜.
+	// ë°ë¯¸ì§€ ê°’(InDamage)ì„ ë°›ì•„ HPë¥¼ ì°¨ê°í•˜ê³ , ê´€ë ¨ ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚µë‹ˆë‹¤.
 	float ApplyDamage(float InDamge);
 
 protected:
-	// SetHp: HP °ªÀ» ¼³Á¤ÇÏ´Â ³»ºÎ ÇÔ¼ö.
-	// HP º¯°æ ÈÄ, OnHpChanged µ¨¸®°ÔÀÌÆ®¸¦ È£ÃâÇÏ°í, HP°¡ 0ÀÌ µÇ¸é OnHpZero µ¨¸®°ÔÀÌÆ®¸¦ ½ÇÇàÇÕ´Ï´Ù.
+	// SetHp: HP ê°’ì„ ì„¤ì •í•˜ëŠ” ë‚´ë¶€ í•¨ìˆ˜.
+	// HP ë³€ê²½ í›„, OnHpChanged ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ í˜¸ì¶œí•˜ê³ , HPê°€ 0ì´ ë˜ë©´ OnHpZero ë¸ë¦¬ê²Œì´íŠ¸ë¥¼ ì‹¤í–‰í•©ë‹ˆë‹¤.
 	void SetHp(float NewHp);
 
-	// ÇöÀç HP °ª.
-	// Transient, VisibleInstanceOnly ¼Ó¼ºÀº ·±Å¸ÀÓ µ¿¾È¿¡¸¸ À¯È¿ÇÏ¸ç ¿¡µðÅÍ¿¡¼­ º¼ ¼ö ÀÖµµ·Ï ÇÕ´Ï´Ù.
+	// í˜„ìž¬ HP ê°’.
+	// Transient, VisibleInstanceOnly ì†ì„±ì€ ëŸ°íƒ€ìž„ ë™ì•ˆì—ë§Œ ìœ íš¨í•˜ë©° ì—ë””í„°ì—ì„œ ë³¼ ìˆ˜ ìžˆë„ë¡ í•©ë‹ˆë‹¤.
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float CurrentHp;
 
-	// °ø°Ý »ç°Å¸®: Ä³¸¯ÅÍÀÇ °ø°Ý ¹üÀ§¸¦ ³ªÅ¸³»´Â °ª.
-	// Transient, VisibleInstanceOnly ¼Ó¼ºÀ¸·Î ¼³Á¤µÇ¾î ·±Å¸ÀÓ µ¿¾È °ªÀÌ À¯ÁöµË´Ï´Ù.
+	// ê³µê²© ì‚¬ê±°ë¦¬: ìºë¦­í„°ì˜ ê³µê²© ë²”ìœ„ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ê°’.
+	// Transient, VisibleInstanceOnly ì†ì„±ìœ¼ë¡œ ì„¤ì •ë˜ì–´ ëŸ°íƒ€ìž„ ë™ì•ˆ ê°’ì´ ìœ ì§€ë©ë‹ˆë‹¤.
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float AttackRadius;
 };

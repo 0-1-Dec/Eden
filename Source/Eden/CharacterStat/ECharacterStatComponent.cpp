@@ -1,57 +1,57 @@
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "ECharacterStatComponent.h"
 
-// »ý¼ºÀÚ: ÄÄÆ÷³ÍÆ®ÀÇ ±âº» ¼Ó¼ºÀ» ¼³Á¤ÇÕ´Ï´Ù.
+// ìƒì„±ìž: ì»´í¬ë„ŒíŠ¸ì˜ ê¸°ë³¸ ì†ì„±ì„ ì„¤ì •í•©ë‹ˆë‹¤.
 UECharacterStatComponent::UECharacterStatComponent()
 {
-	// °ø°Ý »ç°Å¸®¸¦ 50.0À¸·Î ÃÊ±âÈ­ÇÕ´Ï´Ù.
+	// ê³µê²© ì‚¬ê±°ë¦¬ë¥¼ 50.0ìœ¼ë¡œ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
 	AttackRadius = 50.0f;
 
-	// ÄÄÆ÷³ÍÆ®°¡ °ÔÀÓ ½ÃÀÛ ½Ã ÀÚµ¿À¸·Î InitializeComponent() ÇÔ¼ö¸¦ È£ÃâÇÏµµ·Ï ¼³Á¤ÇÕ´Ï´Ù.
+	// ì»´í¬ë„ŒíŠ¸ê°€ ê²Œìž„ ì‹œìž‘ ì‹œ ìžë™ìœ¼ë¡œ InitializeComponent() í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ë„ë¡ ì„¤ì •í•©ë‹ˆë‹¤.
 	bWantsInitializeComponent = true;
 }
 
-// InitializeComponent: ÄÄÆ÷³ÍÆ®°¡ ÃÊ±âÈ­µÉ ¶§ È£ÃâµÇ¸ç, ÃÊ±âÈ­ ÀÛ¾÷À» ¼öÇàÇÕ´Ï´Ù.
+// InitializeComponent: ì»´í¬ë„ŒíŠ¸ê°€ ì´ˆê¸°í™”ë  ë•Œ í˜¸ì¶œë˜ë©°, ì´ˆê¸°í™” ìž‘ì—…ì„ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 void UECharacterStatComponent::InitializeComponent()
 {
-	// »óÀ§ Å¬·¡½ºÀÇ ÃÊ±âÈ­ ÇÔ¼ö¸¦ ¸ÕÀú È£ÃâÇÕ´Ï´Ù.
+	// ìƒìœ„ í´ëž˜ìŠ¤ì˜ ì´ˆê¸°í™” í•¨ìˆ˜ë¥¼ ë¨¼ì € í˜¸ì¶œí•©ë‹ˆë‹¤.
 	Super::InitializeComponent();
 
-	// HP¸¦ ÃÊ±â°ªÀÎ 200À¸·Î ¼³Á¤ÇÕ´Ï´Ù.
+	// HPë¥¼ ì´ˆê¸°ê°’ì¸ 200ìœ¼ë¡œ ì„¤ì •í•©ë‹ˆë‹¤.
 	SetHp(200.f);
 }
 
-// ApplyDamage: ¿ÜºÎ¿¡¼­ µ¥¹ÌÁö¸¦ Àû¿ëÇÒ ¶§ È£ÃâµÇ´Â ÇÔ¼öÀÔ´Ï´Ù.
-// InDamge: Àû¿ëÇÒ µ¥¹ÌÁö °ª.
-// ¹ÝÈ¯°ª: ½ÇÁ¦ Àû¿ëµÈ µ¥¹ÌÁö °ª.
+// ApplyDamage: ì™¸ë¶€ì—ì„œ ë°ë¯¸ì§€ë¥¼ ì ìš©í•  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ìž…ë‹ˆë‹¤.
+// InDamge: ì ìš©í•  ë°ë¯¸ì§€ ê°’.
+// ë°˜í™˜ê°’: ì‹¤ì œ ì ìš©ëœ ë°ë¯¸ì§€ ê°’.
 float UECharacterStatComponent::ApplyDamage(float InDamge)
 {
-	// ÇöÀç HP °ªÀ» ÀÓ½Ã·Î ÀúÀåÇÕ´Ï´Ù.
+	// í˜„ìž¬ HP ê°’ì„ ìž„ì‹œë¡œ ì €ìž¥í•©ë‹ˆë‹¤.
 	const float PrevHp = CurrentHp;
 
-	// µé¾î¿Â µ¥¹ÌÁö(InDamge)¸¦ 0 ÀÌ»ó InDamge ÀÌÇÏ·Î Á¦ÇÑÇÏ¿©, À½¼ö µ¥¹ÌÁö ¹æÁö.
+	// ë“¤ì–´ì˜¨ ë°ë¯¸ì§€(InDamge)ë¥¼ 0 ì´ìƒ InDamge ì´í•˜ë¡œ ì œí•œí•˜ì—¬, ìŒìˆ˜ ë°ë¯¸ì§€ ë°©ì§€.
 	const float ActualDamage = FMath::Clamp<float>(InDamge, 0, InDamge);
 
-	// ÇöÀç HP¿¡¼­ ½ÇÁ¦ µ¥¹ÌÁö¸¦ Â÷°¨ÇÏ¿© »õ·Î¿î HP °ªÀ» ¼³Á¤ÇÕ´Ï´Ù.
+	// í˜„ìž¬ HPì—ì„œ ì‹¤ì œ ë°ë¯¸ì§€ë¥¼ ì°¨ê°í•˜ì—¬ ìƒˆë¡œìš´ HP ê°’ì„ ì„¤ì •í•©ë‹ˆë‹¤.
 	SetHp(PrevHp - ActualDamage);
 
-	// HP°¡ °ÅÀÇ 0 ÀÌÇÏÀÏ °æ¿ì(±Ø¼Ò·® ÀÌÇÏ) OnHpZero ÀÌº¥Æ®¸¦ ¹ß»ý½ÃÄÑ »ç¸Á µî ÈÄ¼Ó Ã³¸®¸¦ ¾Ë¸³´Ï´Ù.
+	// HPê°€ ê±°ì˜ 0 ì´í•˜ì¼ ê²½ìš°(ê·¹ì†ŒëŸ‰ ì´í•˜) OnHpZero ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œì¼œ ì‚¬ë§ ë“± í›„ì† ì²˜ë¦¬ë¥¼ ì•Œë¦½ë‹ˆë‹¤.
 	if (CurrentHp <= KINDA_SMALL_NUMBER)
 	{
 		OnHpZero.Broadcast();
 	}
 
-	// ½ÇÁ¦ Àû¿ëµÈ µ¥¹ÌÁö °ªÀ» ¹ÝÈ¯ÇÕ´Ï´Ù.
+	// ì‹¤ì œ ì ìš©ëœ ë°ë¯¸ì§€ ê°’ì„ ë°˜í™˜í•©ë‹ˆë‹¤.
 	return ActualDamage;
 }
 
-// SetHp: Ä³¸¯ÅÍÀÇ HP °ªÀ» ¼³Á¤ÇÏ´Â ³»ºÎ ÇÔ¼öÀÔ´Ï´Ù.
-// NewHp: ¼³Á¤ÇÒ »õ HP °ª.
+// SetHp: ìºë¦­í„°ì˜ HP ê°’ì„ ì„¤ì •í•˜ëŠ” ë‚´ë¶€ í•¨ìˆ˜ìž…ë‹ˆë‹¤.
+// NewHp: ì„¤ì •í•  ìƒˆ HP ê°’.
 void UECharacterStatComponent::SetHp(float NewHp)
 {
-	// NewHp °ªÀ» 0°ú ÃÖ´ë HP °ª(200) »çÀÌ·Î Á¦ÇÑÇÏ¿© CurrentHp¿¡ ÀúÀåÇÕ´Ï´Ù.
+	// NewHp ê°’ì„ 0ê³¼ ìµœëŒ€ HP ê°’(200) ì‚¬ì´ë¡œ ì œí•œí•˜ì—¬ CurrentHpì— ì €ìž¥í•©ë‹ˆë‹¤.
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, 200.f);
 
-	// HP°¡ º¯°æµÇ¾úÀ½À» ¾Ë¸®±â À§ÇØ OnHpChanged ÀÌº¥Æ®¸¦ ¹ß»ý½ÃÅµ´Ï´Ù.
+	// HPê°€ ë³€ê²½ë˜ì—ˆìŒì„ ì•Œë¦¬ê¸° ìœ„í•´ OnHpChanged ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚µë‹ˆë‹¤.
 	OnHpChanged.Broadcast(CurrentHp);
 }
