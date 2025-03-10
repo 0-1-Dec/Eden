@@ -50,6 +50,24 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		AttackAction = InputActionAttackRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputOneHandedRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_OneHanded.IA_OneHanded'"));
+	if (nullptr != InputOneHandedRef.Object)
+	{
+		OneHandedAction = InputOneHandedRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputBowRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Bow.IA_Bow'"));
+	if (nullptr != InputBowRef.Object)
+	{
+		BowAction = InputBowRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputBothHandedRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_BothHanded.IA_BothHanded'"));
+	if (nullptr != InputBothHandedRef.Object)
+	{
+		BothHandedAction = InputBothHandedRef.Object;
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -87,6 +105,9 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Look);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Attack);
+	EnhancedInputComponent->BindAction(OneHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapOneHanded);
+	EnhancedInputComponent->BindAction(BowAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapBow);
+	EnhancedInputComponent->BindAction(BothHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapBothHanded);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -115,4 +136,52 @@ void AECharacterPlayer::Look(const FInputActionValue& Value)
 void AECharacterPlayer::Attack()
 {
 	ProcessComboCommand();
+}
+
+void AECharacterPlayer::SwapOneHanded()
+{
+	PlayWeaponSwapMontage(EWeaponType::OneHanded, WeaponSwapMontage_OneHanded);
+}
+
+void AECharacterPlayer::SwapBow()
+{
+	PlayWeaponSwapMontage(EWeaponType::Bow, WeaponSwapMontage_Bow);
+}
+
+void AECharacterPlayer::SwapBothHanded()
+{
+	PlayWeaponSwapMontage(EWeaponType::BothHanded, WeaponSwapMontage_BothHanded);
+}
+
+void AECharacterPlayer::PlayWeaponSwapMontage(EWeaponType NewWeaponType, UAnimMontage* Montage)
+{
+	if (CurrentWeaponType == NewWeaponType)
+	{
+		return;
+	}
+
+	if (!Montage)
+	{
+		CurrentWeaponType = NewWeaponType;
+		SetWeaponType(NewWeaponType);
+		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon"));
+		return;
+	}
+
+	/*PendingWeaponType = NewWeaponType;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Play(Montage);
+
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AECharacterPlayer::OnWeaponSwapMontageEnded);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);*/
+}
+
+void AECharacterPlayer::OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	SetWeaponType(PendingWeaponType);
+	/*CurrentWeaponType = PendingWeaponType;
+
+	OnWeaponTypeChanged.Broadcast(CurrentWeaponType);*/
 }

@@ -1,52 +1,52 @@
-// ÇÁ·ÎÁ§Æ® ¼³Á¤ÀÇ Description ÆäÀÌÁö¿¡¼­ ÀúÀÛ±Ç Á¤º¸¸¦ ÀÛ¼ºÇÏ¼¼¿ä.
+// í”„ë¡œì íŠ¸ ì„¤ì •ì˜ Description íŽ˜ì´ì§€ì—ì„œ ì €ìž‘ê¶Œ ì •ë³´ë¥¼ ìž‘ì„±í•˜ì„¸ìš”.
 
 #include "Animation/EAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-// »ý¼ºÀÚ: ±âº» ÀÓ°è°ªµéÀ» ¼³Á¤ÇÕ´Ï´Ù.
+// ìƒì„±ìž: ê¸°ë³¸ ìž„ê³„ê°’ë“¤ì„ ì„¤ì •í•©ë‹ˆë‹¤.
 UEAnimInstance::UEAnimInstance()
 {
-	// MovingThreshould: Ä³¸¯ÅÍ°¡ Á¤Áö »óÅÂ·Î °£ÁÖµÇ´Â 2D ¼Óµµ ÀÓ°è°ª (¿¹: 3.0 ÀÌÇÏÀÌ¸é idle)
+	// MovingThreshould: ìºë¦­í„°ê°€ ì •ì§€ ìƒíƒœë¡œ ê°„ì£¼ë˜ëŠ” 2D ì†ë„ ìž„ê³„ê°’ (ì˜ˆ: 3.0 ì´í•˜ì´ë©´ idle)
 	MovingThreshould = 3.0f;
 
-	// JumpingThreshould: Ä³¸¯ÅÍ°¡ Á¡ÇÁ ÁßÀÎÁö ÆÇ´ÜÇÒ ZÃà ¼Óµµ ÀÓ°è°ª (¿¹: 100.0 ÀÌ»óÀÌ¸é Á¡ÇÁ·Î °£ÁÖ)
+	// JumpingThreshould: ìºë¦­í„°ê°€ ì í”„ ì¤‘ì¸ì§€ íŒë‹¨í•  Zì¶• ì†ë„ ìž„ê³„ê°’ (ì˜ˆ: 100.0 ì´ìƒì´ë©´ ì í”„ë¡œ ê°„ì£¼)
 	JumpingThreshould = 100.0f;
 }
 
-// NativeInitializeAnimation: ¾Ö´Ï¸ÞÀÌ¼Ç ÀÎ½ºÅÏ½º ÃÊ±âÈ­ ½Ã È£ÃâµÇ¾î ÃÊ±â ¼³Á¤À» ¼öÇàÇÕ´Ï´Ù.
+// NativeInitializeAnimation: ì• ë‹ˆë©”ì´ì…˜ ì¸ìŠ¤í„´ìŠ¤ ì´ˆê¸°í™” ì‹œ í˜¸ì¶œë˜ì–´ ì´ˆê¸° ì„¤ì •ì„ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 void UEAnimInstance::NativeInitializeAnimation()
 {
-	// »óÀ§ Å¬·¡½ºÀÇ ÃÊ±âÈ­ ·ÎÁ÷ ½ÇÇà
+	// ìƒìœ„ í´ëž˜ìŠ¤ì˜ ì´ˆê¸°í™” ë¡œì§ ì‹¤í–‰
 	Super::NativeInitializeAnimation();
 
-	// ¾Ö´Ï¸ÞÀÌ¼Ç ÀÎ½ºÅÏ½ºÀÇ ¼ÒÀ¯ÀÚ(¾×ÅÍ)¸¦ ACharacter Å¸ÀÔÀ¸·Î Ä³½ºÆÃÇÏ¿© ÀúÀåÇÕ´Ï´Ù.
+	// ì• ë‹ˆë©”ì´ì…˜ ì¸ìŠ¤í„´ìŠ¤ì˜ ì†Œìœ ìž(ì•¡í„°)ë¥¼ ACharacter íƒ€ìž…ìœ¼ë¡œ ìºìŠ¤íŒ…í•˜ì—¬ ì €ìž¥í•©ë‹ˆë‹¤.
 	Owner = Cast<ACharacter>(GetOwningActor());
 	if (Owner)
 	{
-		// Ä³¸¯ÅÍÀÇ ÀÌµ¿ ÄÄÆ÷³ÍÆ®¸¦ °¡Á®¿Í¼­ Movement º¯¼ö¿¡ ÇÒ´çÇÕ´Ï´Ù.
+		// ìºë¦­í„°ì˜ ì´ë™ ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì™€ì„œ Movement ë³€ìˆ˜ì— í• ë‹¹í•©ë‹ˆë‹¤.
 		Movement = Owner->GetCharacterMovement();
 	}
 }
 
-// NativeUpdateAnimation: ¸Å ÇÁ·¹ÀÓ È£ÃâµÇ¾î ¾Ö´Ï¸ÞÀÌ¼Ç »óÅÂ¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.
+// NativeUpdateAnimation: ë§¤ í”„ë ˆìž„ í˜¸ì¶œë˜ì–´ ì• ë‹ˆë©”ì´ì…˜ ìƒíƒœë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.
 void UEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	// »óÀ§ Å¬·¡½ºÀÇ ¾÷µ¥ÀÌÆ® ·ÎÁ÷ ½ÇÇà
+	// ìƒìœ„ í´ëž˜ìŠ¤ì˜ ì—…ë°ì´íŠ¸ ë¡œì§ ì‹¤í–‰
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	if (Movement)
 	{
-		// ÇöÀç ÀÌµ¿ ÄÄÆ÷³ÍÆ®ÀÇ ¼Óµµ¸¦ Velocity¿¡ ÀúÀåÇÕ´Ï´Ù.
+		// í˜„ìž¬ ì´ë™ ì»´í¬ë„ŒíŠ¸ì˜ ì†ë„ë¥¼ Velocityì— ì €ìž¥í•©ë‹ˆë‹¤.
 		Velocity = Movement->Velocity;
-		// 2D Æò¸é»óÀÇ ¼Óµµ Å©±â¸¦ °è»êÇÏ¿© Áö¸é ÀÌµ¿ ¼Óµµ¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.
+		// 2D í‰ë©´ìƒì˜ ì†ë„ í¬ê¸°ë¥¼ ê³„ì‚°í•˜ì—¬ ì§€ë©´ ì´ë™ ì†ë„ë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.
 		GroundSpeed = Velocity.Size2D();
-		// Áö¸é ¼Óµµ°¡ MovingThreshouldº¸´Ù ÀÛÀ¸¸é Ä³¸¯ÅÍ¸¦ Á¤Áö(idle) »óÅÂ·Î °£ÁÖÇÕ´Ï´Ù.
+		// ì§€ë©´ ì†ë„ê°€ MovingThreshouldë³´ë‹¤ ìž‘ìœ¼ë©´ ìºë¦­í„°ë¥¼ ì •ì§€(idle) ìƒíƒœë¡œ ê°„ì£¼í•©ë‹ˆë‹¤.
 		bIsIdle = GroundSpeed < MovingThreshould;
-		// Ä³¸¯ÅÍ°¡ °øÁß¿¡ ¶° ÀÖ´ÂÁö(³«ÇÏ ÁßÀÎÁö)¸¦ ÆÇ´ÜÇÕ´Ï´Ù.
+		// ìºë¦­í„°ê°€ ê³µì¤‘ì— ë–  ìžˆëŠ”ì§€(ë‚™í•˜ ì¤‘ì¸ì§€)ë¥¼ íŒë‹¨í•©ë‹ˆë‹¤.
 		bIsFalling = Movement->IsFalling();
-		// Ä³¸¯ÅÍ°¡ Á¡ÇÁ ÁßÀÎÁö ¿©ºÎ¸¦ °áÁ¤ÇÕ´Ï´Ù.
-		// Á¡ÇÁ »óÅÂ´Â ³«ÇÏ ÁßÀÌ¸é¼­, ZÃà ¼Óµµ°¡ JumpingThreshouldº¸´Ù Å« °æ¿ì·Î ÆÇ´ÜÇÕ´Ï´Ù.
+		// ìºë¦­í„°ê°€ ì í”„ ì¤‘ì¸ì§€ ì—¬ë¶€ë¥¼ ê²°ì •í•©ë‹ˆë‹¤.
+		// ì í”„ ìƒíƒœëŠ” ë‚™í•˜ ì¤‘ì´ë©´ì„œ, Zì¶• ì†ë„ê°€ JumpingThreshouldë³´ë‹¤ í° ê²½ìš°ë¡œ íŒë‹¨í•©ë‹ˆë‹¤.
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
 	}
 }

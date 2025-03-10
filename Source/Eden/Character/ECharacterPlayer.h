@@ -25,7 +25,6 @@ protected:
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
 //Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -51,8 +50,37 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> OneHandedAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> BowAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> BothHandedAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
 	void Attack();
+
+// 무기스왑 애니메이션
+protected:
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UAnimMontage* WeaponSwapMontage_OneHanded;
+
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UAnimMontage* WeaponSwapMontage_Bow;
+
+	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UAnimMontage* WeaponSwapMontage_BothHanded;
+
+	EWeaponType PendingWeaponType;
+
+	void SwapOneHanded();
+	void SwapBow();
+	void SwapBothHanded();
+
+	void PlayWeaponSwapMontage(EWeaponType NewWeaponType, UAnimMontage* Montage);
+	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };
