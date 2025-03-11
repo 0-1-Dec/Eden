@@ -38,8 +38,6 @@ AECharacterBase::AECharacterBase()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
-	WeaponMontages.Reserve(3);
-
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple'"));
 	if (CharacterMeshRef.Object)
 	{
@@ -50,18 +48,6 @@ AECharacterBase::AECharacterBase()
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> OneHandedActionMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/AM_OneHanded.AM_OneHanded'"));
-	if (OneHandedActionMontageRef.Object)
-	{
-		WeaponMontages.Add(EWeaponType::OneHanded, OneHandedActionMontageRef.Object);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> BowActionMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/AM_Bow.AM_Bow'"));
-	if (BowActionMontageRef.Object)
-	{
-		WeaponMontages.Add(EWeaponType::Bow, BowActionMontageRef.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UEComboActionData> ComboActionDataRef(TEXT("/Script/Eden.EComboActionData'/Game/Eden/ChracterAction/EA_ComboAttack.EA_ComboAttack'"));
@@ -93,15 +79,15 @@ void AECharacterBase::PostInitializeComponents()
 	Stat->OnHpZero.AddUObject(this, &AECharacterBase::SetDead);
 }
 
-void AECharacterBase::SetWeaponType(EWeaponType NewWeaponType)
+void AECharacterBase::SetWeaponData(UWeaponDataAsset* NewWeaponData)
 {
-	if (CurrentWeaponType == NewWeaponType)
+	if (CurrentWeaponData == NewWeaponData)
 	{
 		return;
 	}
 
-	CurrentWeaponType = NewWeaponType;
-	OnWeaponTypeChanged.Broadcast(NewWeaponType);
+	CurrentWeaponData = NewWeaponData;
+	OnWeaponDataChanged.Broadcast(NewWeaponData);
 }
 
 // ProcessComboCommand: 콤보 커맨드를 처리하는 함수입니다.
@@ -137,7 +123,7 @@ void AECharacterBase::ComboActionBegin()
 	// 이동 중지: 콤보 실행 중에는 캐릭터가 움직이지 않도록 설정
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
-	ComboActionMontage = WeaponMontages[CurrentWeaponType];
+	ComboActionMontage = CurrentWeaponData->AttackMontage;
 	
 	// 애니메이션 설정: 콤보 애니메이션 몽타주 재생
 	const float AttackSpeedRate = 1.f;

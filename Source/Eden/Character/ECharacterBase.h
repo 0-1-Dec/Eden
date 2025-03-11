@@ -6,9 +6,10 @@
 #include "GameFramework/Character.h"
 #include "Interface/EAnimationAttackInterface.h"
 #include "Animation/EWeaponType.h"
+#include "Item/WeaponDataAsset.h"
 #include "ECharacterBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponTypeChangedDelegate, EWeaponType, NewWeaponType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, UWeaponDataAsset*, NewWeaponData);
 
 // AECharacterBase 클래스는 ACharacter를 상속받아 게임 캐릭터의 기본 동작을 구현하며,
 // IEAnimationAttackInterface를 구현하여 애니메이션 공격 관련 기능을 제공합니다.
@@ -24,17 +25,16 @@ public:
 	virtual void PostInitializeComponents() override;
 
 public:
-	FOnWeaponTypeChangedDelegate OnWeaponTypeChanged;
+	FOnWeaponDataChanged OnWeaponDataChanged;
 
+	// =========================================================================================
 	// 무기 상태 관리
+	// =========================================================================================
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	EWeaponType CurrentWeaponType;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Weapon,meta=(AllowPrivateAccess="true"))
+	UWeaponDataAsset* CurrentWeaponData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	TMap<EWeaponType, UAnimMontage*> WeaponMontages;
-
-	void SetWeaponType(EWeaponType NewWeaponType);
+	void SetWeaponData(UWeaponDataAsset* NewWeaponData);
 
 	// =========================================================================================
 	// 콤보 애니메이션 섹션
@@ -100,7 +100,6 @@ protected:
 	TSubclassOf<class AEArrow> ArrowBP;
 
 	virtual void ShootArrow() override;
-
 
 	// =========================================================================================
 	// Dead 애니메이션 섹션
