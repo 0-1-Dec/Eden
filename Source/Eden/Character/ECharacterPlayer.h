@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/ECharacterBase.h"
 #include "InputActionValue.h"
+#include "Item/WeaponDataAsset.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
@@ -66,21 +67,30 @@ protected:
 
 // 무기스왑 애니메이션
 protected:
-	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	UWeaponDataAsset* OneHandedData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	UWeaponDataAsset* BowData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	UWeaponDataAsset* BothHandedData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
 	UAnimMontage* WeaponSwapMontage_OneHanded;
 
-	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
 	UAnimMontage* WeaponSwapMontage_Bow;
 
-	UPROPERTY(EditAnywhere, blueprintReadWrite, Category = WaeponAnimation)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
 	UAnimMontage* WeaponSwapMontage_BothHanded;
 
-	EWeaponType PendingWeaponType;
+	UWeaponDataAsset* PendingWeaponData;
 
 	void SwapOneHanded();
 	void SwapBow();
 	void SwapBothHanded();
 
-	void PlayWeaponSwapMontage(EWeaponType NewWeaponType, UAnimMontage* Montage);
+	void PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
 	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

@@ -68,6 +68,8 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		BothHandedAction = InputBothHandedRef.Object;
 	}
+
+	//static ConstructorHelpers::FObjectFinder
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -140,35 +142,35 @@ void AECharacterPlayer::Attack()
 
 void AECharacterPlayer::SwapOneHanded()
 {
-	PlayWeaponSwapMontage(EWeaponType::OneHanded, WeaponSwapMontage_OneHanded);
+	PlayWeaponSwapMontage(OneHandedData, WeaponSwapMontage_OneHanded);
 }
 
 void AECharacterPlayer::SwapBow()
 {
-	PlayWeaponSwapMontage(EWeaponType::Bow, WeaponSwapMontage_Bow);
+	PlayWeaponSwapMontage(BowData, WeaponSwapMontage_Bow);
 }
 
 void AECharacterPlayer::SwapBothHanded()
 {
-	PlayWeaponSwapMontage(EWeaponType::BothHanded, WeaponSwapMontage_BothHanded);
+	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
 }
 
-void AECharacterPlayer::PlayWeaponSwapMontage(EWeaponType NewWeaponType, UAnimMontage* Montage)
+void AECharacterPlayer::PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, UAnimMontage* Montage)
 {
-	if (CurrentWeaponType == NewWeaponType)
+	if (CurrentWeaponData == NewWeaponData)
 	{
 		return;
 	}
 
 	if (!Montage)
 	{
-		CurrentWeaponType = NewWeaponType;
-		SetWeaponType(NewWeaponType);
+		CurrentWeaponData = NewWeaponData;
+		SetWeaponData(NewWeaponData);
 		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon"));
 		return;
 	}
 
-	/*PendingWeaponType = NewWeaponType;
+	/*PendingWeaponData = NewWeaponData;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(Montage);
@@ -180,8 +182,9 @@ void AECharacterPlayer::PlayWeaponSwapMontage(EWeaponType NewWeaponType, UAnimMo
 
 void AECharacterPlayer::OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	SetWeaponType(PendingWeaponType);
-	/*CurrentWeaponType = PendingWeaponType;
-
-	OnWeaponTypeChanged.Broadcast(CurrentWeaponType);*/
+	if(PendingWeaponData)
+	{
+		SetWeaponData(PendingWeaponData);
+		PendingWeaponData = nullptr;
+	}
 }
