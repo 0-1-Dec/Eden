@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/EAnimationAttackInterface.h"
-#include "Animation/EWeaponType.h"
-#include "Item/WeaponDataAsset.h"
+#include "GameData/WeaponDataAsset.h"
 #include "ECharacterBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, UWeaponDataAsset*, NewWeaponData);

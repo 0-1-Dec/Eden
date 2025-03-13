@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "Character/ECharacterBase.h"
 #include "InputActionValue.h"
-#include "Item/WeaponDataAsset.h"
+#include "GameData/WeaponDataAsset.h"
+#include "UI/EInventoryWidget.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
@@ -60,6 +61,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> BothHandedAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> OpenInventoryAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
@@ -93,4 +97,19 @@ protected:
 
 	void PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
 	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	// 인벤토리 섹션
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
+	TObjectPtr<class UEInventoryComponent> InventoryComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = UI)
+	TSubclassOf<UEInventoryWidget> InventoryWidgetClass;
+
+	UPROPERTY()
+	UEInventoryWidget* InventoryWidgetInstance;
+
+	bool bInventoryOpen = false;
+
+	void ToggleInventoryUI();
 };

@@ -7,6 +7,8 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
+#include "Inventory/EInventoryComponent.h"
 
 AECharacterPlayer::AECharacterPlayer()
 {
@@ -19,6 +21,8 @@ AECharacterPlayer::AECharacterPlayer()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	InventoryComponent = CreateDefaultSubobject<UEInventoryComponent>(TEXT("InventoryComponent"));
 
 	// Input
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/Eden/Input/IMC_Default.IMC_Default'"));
@@ -69,7 +73,11 @@ AECharacterPlayer::AECharacterPlayer()
 		BothHandedAction = InputBothHandedRef.Object;
 	}
 
-	//static ConstructorHelpers::FObjectFinder
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputOpenInventoryRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_OpenInventory.IA_OpenInventory'"));
+	if (nullptr != InputOpenInventoryRef.Object)
+	{
+		OpenInventoryAction = InputOpenInventoryRef.Object;
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -80,17 +88,16 @@ void AECharacterPlayer::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		//Subsystem->RemoveMappingContext(DefaultMappingContext);
 	}
 
+	SetWeaponData(OneHandedData);
 }
 
 void AECharacterPlayer::SetDead()
 {
 	Super::SetDead();
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		DisableInput(PlayerController);
 	}
@@ -107,9 +114,14 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Look);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Attack);
+
+	// 무기 교체
 	EnhancedInputComponent->BindAction(OneHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapOneHanded);
 	EnhancedInputComponent->BindAction(BowAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapBow);
 	EnhancedInputComponent->BindAction(BothHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapBothHanded);
+
+	// 인벤토리
+	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Started, this, &AECharacterPlayer::ToggleInventoryUI);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -166,7 +178,7 @@ void AECharacterPlayer::PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, U
 	{
 		CurrentWeaponData = NewWeaponData;
 		SetWeaponData(NewWeaponData);
-		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon"));
+		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon %s"), *CurrentWeaponData->GetName());
 		return;
 	}
 
@@ -187,4 +199,43 @@ void AECharacterPlayer::OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bIn
 		SetWeaponData(PendingWeaponData);
 		PendingWeaponData = nullptr;
 	}
+}
+
+void AECharacterPlayer::ToggleInventoryUI()
+{
+	if (!InventoryWidgetInstance && InventoryWidgetClass)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			InventoryWidgetInstance = CreateWidget<UEInventoryWidget>(PC, InventoryWidgetClass);
+		}
+	}
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (InventoryWidgetInstance)
+	{
+		if (bInventoryOpen)
+		{
+			InventoryWidgetInstance->RemoveFromParent();
+			bInventoryOpen = false;
+
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+		}
+		else
+		{
+			
+			InventoryWidgetInstance->AddToViewport();
+			bInventoryOpen = true;
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+	}
+
+	InventoryComponent->DebugPrintInventory();
 }
