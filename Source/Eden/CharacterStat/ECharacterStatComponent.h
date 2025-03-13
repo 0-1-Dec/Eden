@@ -43,7 +43,7 @@ public:
 
 	// ApplyDamage: 외부에서 데미지를 적용할 때 호출되는 함수.
 	// 데미지 값(InDamage)을 받아 HP를 차감하고, 관련 이벤트를 발생시킵니다.
-	float ApplyDamage(float InDamge);
+	float ApplyDamage(float InDamage);
 
 protected:
 	// SetHp: HP 값을 설정하는 내부 함수.
@@ -59,4 +59,71 @@ protected:
 	// Transient, VisibleInstanceOnly 속성으로 설정되어 런타임 동안 값이 유지됩니다.
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float AttackRadius;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
+	int32 CurrentLevel = 1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
+	int32 CurrentExp = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
+	int32 ExpToNextLevel = 100;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Level)
+	int32 StatPointPerLevel = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Level)
+	int32 RemainStatPoint = 0;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	float BaseMaxHp = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	float BaseAttack = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	float BaseDefense = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat)
+	float BonusMaxHp = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat)
+	float BonusAttack = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat)
+	float BonusDefense = 0.f;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int32 GetCurrentLevel() const { return CurrentLevel; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int32  GetCurrentExp() const { return CurrentExp; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int32 GetRemainStatPoint() const { return RemainStatPoint; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetMaxHp() const { return BaseMaxHp + BonusMaxHp; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetAttack() const { return BaseAttack + BonusAttack; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetDefense() const { return BaseDefense + BonusDefense; }
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void AddExp(int32 InExp);
+
+	UFUNCTION(BlueprintCallable)
+	void DistributeStatPoint(FName StatName, float Amount);
+
+protected:
+	void CheckLevelUp();
+
+	void LevelUp();
 };

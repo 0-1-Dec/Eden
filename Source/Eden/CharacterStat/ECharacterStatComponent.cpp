@@ -1,5 +1,4 @@
 #include "CharacterStat/ECharacterStatComponent.h"
-#include "ECharacterStatComponent.h"
 
 // 생성자: 컴포넌트의 기본 속성을 설정합니다.
 UECharacterStatComponent::UECharacterStatComponent()
@@ -18,19 +17,19 @@ void UECharacterStatComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	// HP를 초기값인 200으로 설정합니다.
-	SetHp(200.f);
+	CurrentHp = GetMaxHp();
 }
 
 // ApplyDamage: 외부에서 데미지를 적용할 때 호출되는 함수입니다.
-// InDamge: 적용할 데미지 값.
+// InDamage: 적용할 데미지 값.
 // 반환값: 실제 적용된 데미지 값.
-float UECharacterStatComponent::ApplyDamage(float InDamge)
+float UECharacterStatComponent::ApplyDamage(float InDamage)
 {
 	// 현재 HP 값을 임시로 저장합니다.
 	const float PrevHp = CurrentHp;
 
-	// 들어온 데미지(InDamge)를 0 이상 InDamge 이하로 제한하여, 음수 데미지 방지.
-	const float ActualDamage = FMath::Clamp<float>(InDamge, 0, InDamge);
+	// 들어온 데미지(InDamage)를 0 이상 InDamage 이하로 제한하여, 음수 데미지 방지.
+	const float ActualDamage = FMath::Clamp<float>(InDamage, 0, InDamage);
 
 	// 현재 HP에서 실제 데미지를 차감하여 새로운 HP 값을 설정합니다.
 	SetHp(PrevHp - ActualDamage);
@@ -54,4 +53,57 @@ void UECharacterStatComponent::SetHp(float NewHp)
 
 	// HP가 변경되었음을 알리기 위해 OnHpChanged 이벤트를 발생시킵니다.
 	OnHpChanged.Broadcast(CurrentHp);
+}
+
+void UECharacterStatComponent::AddExp(int32 InExp)
+{
+	CurrentHp += InExp;
+
+	CheckLevelUp();
+}
+
+void UECharacterStatComponent::DistributeStatPoint(FName StatName, float Amount)
+{
+	if (RemainStatPoint <= 0 || Amount <= 0)
+	{
+		return;
+	}
+
+	float UsedPoint = FMath::Clamp<float>(Amount, 0, static_cast<float>(RemainStatPoint));
+
+	if (StatName == "Hp")
+	{
+		BonusMaxHp += UsedPoint;
+	}
+	else if (StatName == "Attack")
+	{
+		BonusAttack += UsedPoint;
+	}
+	else if (StatName == "Defense")
+	{
+		BonusDefense += UsedPoint;
+	}
+
+	RemainStatPoint -= static_cast<int32>(UsedPoint);
+
+	CurrentHp = FMath::Min(CurrentHp, GetMaxHp());
+	OnHpChanged.Broadcast(CurrentHp);
+}
+
+void UECharacterStatComponent::CheckLevelUp()
+{
+	if (CurrentHp >= ExpToNextLevel)
+	{
+		CurrentExp -= ExpToNextLevel;
+		LevelUp();
+	}
+}
+
+void UECharacterStatComponent::LevelUp()
+{
+	CurrentLevel += 1;
+
+	ExpToNextLevel = CurrentLevel * 100;
+
+	RemainStatPoint += StatPointPerLevel;
 }

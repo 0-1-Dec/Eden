@@ -231,6 +231,7 @@ void AECharacterBase::AttackHitCheck()
 	{
 		FDamageEvent DamageEvent;
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+		UE_LOG(LogTemp, Display, TEXT("Damage : %f"), AttackDamage);
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.
