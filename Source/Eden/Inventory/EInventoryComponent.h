@@ -37,7 +37,7 @@ public:
 	bool AddItem(UEItemDataAsset* ItemData, int32 Quantity);
 
 	UFUNCTION(BlueprintCallable)
-	bool RemoveItem(UEItemDataAsset* ItemData, int32 Quantity);
+	bool RemoveItem(UEItemDataAsset* ItemData, int32 SlotIndex);
 
 	UFUNCTION(BlueprintCallable)
 	FEInventorySlot GetSlot(int32 SlotIndex);
