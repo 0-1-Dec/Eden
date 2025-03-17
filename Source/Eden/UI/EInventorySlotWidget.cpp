@@ -8,6 +8,7 @@
 #include <comdef.h>
 
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Character/ECharacterPlayer.h"
 
 void UEInventorySlotWidget::NativeConstruct()
 {
@@ -42,10 +43,30 @@ void UEInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, co
 	}
 	
 	UEInventoryDragDropOperation* DragOp = NewObject<UEInventoryDragDropOperation>(this);
-	DragOp->SourceSlotIndex = SlotIndex;
 	DragOp->DraggedSlot = SlotData;
 	DragOp->DefaultDragVisual = this;
+	DragOp->SourceSlotIndex = SlotIndex;
+	DragOp->Offset = InGeometry.GetLocalSize() * 0.005;
+	
 	OutOperation = DragOp;
+}
+
+void UEInventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	UEInventoryDragDropOperation* DragOp = Cast<UEInventoryDragDropOperation>(InOperation);
+	if (DragOp && !IsEmpty())
+	{
+		if (AECharacterPlayer* Player = Cast<AECharacterPlayer>(GetOwningPlayerPawn()))
+		{
+			if (Player->InventoryComponent)
+			{
+				Player->InventoryComponent->RemoveItem(DragOp->DraggedSlot.ItemData, DragOp->SourceSlotIndex);
+			}
+		}
+	}
+	
+	Super::NativeOnDragCancelled(InDragDropEvent,InOperation);
 }
 
 void UEInventorySlotWidget::SetSlotData(const FEInventorySlot& NewSlotData)

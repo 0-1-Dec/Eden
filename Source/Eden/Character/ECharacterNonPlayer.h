@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Character/ECharacterBase.h"
+#include "Interface/EGeneralAIInterface.h"
 #include "ECharacterNonPlayer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EDEN_API AECharacterNonPlayer : public AECharacterBase
+class EDEN_API AECharacterNonPlayer : public AECharacterBase, public IEGeneralAIInterface
 {
 	GENERATED_BODY()
 	
@@ -19,4 +20,17 @@ public:
 
 protected:
 	void SetDead() override;
+
+protected:
+	virtual float GetAIPatrolRadius() override;
+	virtual float GetAIDetectRange() override;
+	virtual float GetAIAttackRange() override;
+	virtual float GetAITurnSpeed() override;
+
+	virtual void SetAIAttackDelegate(const FGeneralAIAttackFinished& InOnAttackFinished) override;
+	virtual void AttackByAI() override;
+
+	FGeneralAIAttackFinished OnAttackFinished;
+
+	virtual void NotifyComboActionEnd() override;
 };
