@@ -28,5 +28,5 @@ public:
 	float AttackSpeed;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
-		UAnimMontage* AttackMontage;
+	UAnimMontage* AttackMontage;
 };

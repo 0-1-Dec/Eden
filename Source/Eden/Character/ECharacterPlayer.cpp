@@ -22,6 +22,8 @@ AECharacterPlayer::AECharacterPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	float DefaultFOV = FollowCamera -> FieldOfView;
+
 	InventoryComponent = CreateDefaultSubobject<UEInventoryComponent>(TEXT("InventoryComponent"));
 
 	// Input
@@ -78,6 +80,12 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		OpenInventoryAction = InputOpenInventoryRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputBowZoomRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_BowZoom.IA_BowZoom'"));
+	if(nullptr != InputBowZoomRef.Object)
+	{
+		BowZoomAction = InputBowZoomRef.Object;
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -122,6 +130,10 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	// 인벤토리
 	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Started, this, &AECharacterPlayer::ToggleInventoryUI);
+
+	// 활 줌
+	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Triggered,this,&AECharacterPlayer::BowZoomIn);
+	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Completed,this,&AECharacterPlayer::BowZoomOut);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -154,16 +166,19 @@ void AECharacterPlayer::Attack()
 
 void AECharacterPlayer::SwapOneHanded()
 {
+	bIsBow = false;
 	PlayWeaponSwapMontage(OneHandedData, WeaponSwapMontage_OneHanded);
 }
 
 void AECharacterPlayer::SwapBow()
 {
+	bIsBow = true;
 	PlayWeaponSwapMontage(BowData, WeaponSwapMontage_Bow);
 }
 
 void AECharacterPlayer::SwapBothHanded()
 {
+	bIsBow = false;
 	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
 }
 
@@ -238,4 +253,49 @@ void AECharacterPlayer::ToggleInventoryUI()
 	}
 
 	InventoryComponent->DebugPrintInventory();
+}
+
+void AECharacterPlayer::BowZoomIn()
+{
+	if(bIsBow){
+		if(!CrosshairWidgetInstance && CrosshairWidgetClass)
+		{
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if(PC)
+			{
+				CrosshairWidgetInstance = CreateWidget<UECrosshairWidget>(PC,CrosshairWidgetClass);
+			}
+		}
+
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if(CrosshairWidgetInstance)
+		{
+
+			CrosshairWidgetInstance->AddToViewport();
+			UE_LOG(LogTemp,Log,TEXT("Crosshair On"));
+		}
+
+		FollowCamera -> SetFieldOfView(60.f);
+		AttackSpeedChange(CurrentWeaponData,1);
+	}
+	else
+	{
+		BowZoomOut();
+	}
+}
+
+void AECharacterPlayer::BowZoomOut(){
+	FollowCamera -> SetFieldOfView(90.f);
+
+	if(CrosshairWidgetInstance)
+	{
+
+		CrosshairWidgetInstance->RemoveFromViewport();
+		UE_LOG(LogTemp,Log,TEXT("Crosshair Off"));
+	}
+	AttackSpeedChange(CurrentWeaponData,1000);
+}
+
+void AECharacterPlayer::AttackSpeedChange(UWeaponDataAsset* WeaponData, float AttackSpeed){
+	WeaponData->AttackSpeed = AttackSpeed;
 }
