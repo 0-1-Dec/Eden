@@ -251,7 +251,7 @@ void AECharacterBase::AttackHitCheck()
 
 void AECharacterBase::ShootArrow()
 {
-	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket")) + GetActorForwardVector() * 100.f;
+	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket")) + GetActorForwardVector();
 	FRotator MuzzleRotation = GetActorRotation();
 
 	FActorSpawnParameters SpawnParams;

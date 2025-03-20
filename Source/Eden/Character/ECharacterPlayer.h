@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameData/WeaponDataAsset.h"
 #include "UI/EInventoryWidget.h"
+#include "UI/ECrosshairWidget.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
@@ -64,6 +65,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> OpenInventoryAction;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> BowZoomAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
@@ -112,4 +116,18 @@ public:
 	bool bInventoryOpen = false;
 
 	void ToggleInventoryUI();
+
+	// 활 섹션
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
+	TSubclassOf<UECrosshairWidget> CrosshairWidgetClass;
+
+	UPROPERTY()
+	UECrosshairWidget* CrosshairWidgetInstance;
+
+	bool bIsBow = false;
+
+	void BowZoomIn();
+	void BowZoomOut();
+
+	void AttackSpeedChange(UWeaponDataAsset* NewWeaponData, float AttackSpeed);
 };
