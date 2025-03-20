@@ -193,7 +193,7 @@ void AECharacterPlayer::PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, U
 	{
 		CurrentWeaponData = NewWeaponData;
 		SetWeaponData(NewWeaponData);
-		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon %s"), *CurrentWeaponData->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon %s"), *NewWeaponData->GetName());
 		return;
 	}
 

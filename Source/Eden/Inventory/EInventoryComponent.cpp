@@ -25,8 +25,6 @@ void UEInventoryComponent::InitializeInventory(int32 InSlotCount)
 	{
 		InSlotCount = 1;
 	}
-
-	
 	
 	Slots.SetNum(InSlotCount);
 }
@@ -102,43 +100,30 @@ bool UEInventoryComponent::AddItem(UEItemDataAsset* ItemData, int32 Quantity)
 	return (Quantity <= 0);
 }
 
-bool UEInventoryComponent::RemoveItem(UEItemDataAsset* ItemData, int32 Quantity)
+bool UEInventoryComponent::RemoveItem(UEItemDataAsset* ItemData, int32 SlotIndex)
 {
-	if (!ItemData || Quantity <= 0)
+	if (!ItemData || SlotIndex < 0 || SlotIndex >= Slots.Num())
 	{
+		UE_LOG(LogTemp, Error, TEXT("Error In RemoveItem"));
 		return false;
 	}
 
-	bool bRemovedItem = false;
-	for (int32 i = 0; i < Slots.Num(); i++)
+	if (Slots[SlotIndex].ItemData && Slots[SlotIndex].Quantity > 0)
 	{
-		if (Slots[i].ItemData == ItemData && Slots[i].Quantity > 0)
+		Slots[SlotIndex].Quantity -= 1;
+
+		if (Slots[SlotIndex].Quantity <= 0)
 		{
-			int32 RemoveAmount = FMath::Min(Quantity, Slots[i].Quantity);
-			Slots[i].Quantity -= RemoveAmount;
-			Quantity -= RemoveAmount;
-
-			if (Slots[i].Quantity <= 0)
-			{
-				Slots[i].ItemData = nullptr;
-				Slots[i].Quantity = 0;
-			}
-
-			bRemovedItem = true;
-
-			if (Quantity <= 0)
-			{
-				return true;
-			}
+			Slots[SlotIndex].ItemData = nullptr;
+			Slots[SlotIndex].Quantity = 0;
+			OnInventoryChanged.Broadcast();
+			return true;
 		}
-	}
 
-	if (bRemovedItem)
-	{
 		OnInventoryChanged.Broadcast();
 		return true;
 	}
-
+	
 	return false;
 }
 
@@ -173,7 +158,6 @@ void UEInventoryComponent::MoveItem(int32 SourceSlotIndex, int32 TargetSlotIndex
 		Slots[SourceSlotIndex].ItemData = nullptr;
 		Slots[SourceSlotIndex].Quantity = 0;
 		OnInventoryChanged.Broadcast();
-		UE_LOG(LogTemp, Warning, TEXT("Item moved"));
 	}
 }
 
@@ -184,12 +168,35 @@ void UEInventoryComponent::SwapItems(int32 SourceSlotIndex, int32 TargetSlotInde
 		return;
 	}
 
+	if (Slots[SourceSlotIndex].ItemData == Slots[TargetSlotIndex].ItemData)
+	{
+		int32 Increment = FMath::Abs(Slots[TargetSlotIndex].Quantity - Slots[SourceSlotIndex].Quantity);
+		if (Slots[TargetSlotIndex].ItemData->MaxStackSize < Slots[TargetSlotIndex].Quantity + Increment)
+		{
+			Increment = Slots[TargetSlotIndex].ItemData->MaxStackSize - Slots[TargetSlotIndex].Quantity;
+			Slots[TargetSlotIndex].Quantity = Slots[TargetSlotIndex].ItemData->MaxStackSize;
+			Slots[SourceSlotIndex].Quantity -= Increment;
+		}
+		else
+		{
+			Slots[TargetSlotIndex].Quantity += Increment;
+			Slots[SourceSlotIndex].Quantity -= Increment;	
+		}
+		
+		if (Slots[SourceSlotIndex].Quantity <= 0)
+		{
+			Slots[SourceSlotIndex].ItemData = nullptr;
+			Slots[SourceSlotIndex].Quantity = 0;
+		}
+
+		OnInventoryChanged.Broadcast();
+		return;
+		
+	}
 	FEInventorySlot Temp = Slots[SourceSlotIndex];
 	Slots[SourceSlotIndex] = Slots[TargetSlotIndex];
 	Slots[TargetSlotIndex] = Temp;
 	OnInventoryChanged.Broadcast();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Item swapped Source : %d, Target : %d"), SourceSlotIndex, TargetSlotIndex);
 }
 
 void UEInventoryComponent::DebugPrintInventory()
