@@ -37,6 +37,9 @@ AECharacterBoss::AECharacterBoss()
 	{
 		BossWeapon = BossWeaponDataRef.Object;;
 	}
+
+	bIsStaggerInProgress = false;
+	CurrentStaggerGauge = 0;
 }
 
 void AECharacterBoss::PostInitializeComponents()

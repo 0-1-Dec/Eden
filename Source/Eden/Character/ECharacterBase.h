@@ -125,6 +125,6 @@ protected:
 	TObjectPtr<class UECharacterStatComponent> Stat;
 
 public:
-	bool bIsStaggerInProgress = false;
-	float CurrentStaggerGauge = 0.f;
+	bool bIsStaggerInProgress;
+	float CurrentStaggerGauge;
 };
