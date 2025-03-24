@@ -182,7 +182,7 @@ void AECharacterPlayer::SwapBothHanded()
 	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
 }
 
-void AECharacterPlayer::PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, UAnimMontage* Montage)
+void AECharacterPlayer::PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, UAnimMontage* Montage)
 {
 	if (CurrentWeaponData == NewWeaponData)
 	{
@@ -296,6 +296,6 @@ void AECharacterPlayer::BowZoomOut(){
 	AttackSpeedChange(CurrentWeaponData,1000);
 }
 
-void AECharacterPlayer::AttackSpeedChange(UWeaponDataAsset* WeaponData, float AttackSpeed){
+void AECharacterPlayer::AttackSpeedChange(UEWeaponDataAsset* WeaponData, float AttackSpeed){
 	WeaponData->AttackSpeed = AttackSpeed;
 }

@@ -44,7 +44,7 @@ AECharacterBase::AECharacterBase()
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Eden/Animation/ABP_ECharacter.ABP_ECharacter_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Eden/Animation/Default/ABP_ECharacter.ABP_ECharacter_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
@@ -56,7 +56,7 @@ AECharacterBase::AECharacterBase()
 		ComboActionData = ComboActionDataRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/AM_Dead.AM_Dead'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/Default/AM_Dead.AM_Dead'"));
 	if (DeadMontageRef.Object)
 	{
 		DeadMontage = DeadMontageRef.Object;
@@ -79,7 +79,7 @@ void AECharacterBase::PostInitializeComponents()
 	Stat->OnHpZero.AddUObject(this, &AECharacterBase::SetDead);
 }
 
-void AECharacterBase::SetWeaponData(UWeaponDataAsset* NewWeaponData)
+void AECharacterBase::SetWeaponData(UEWeaponDataAsset* NewWeaponData)
 {
 	if (CurrentWeaponData == NewWeaponData)
 	{
@@ -126,7 +126,7 @@ void AECharacterBase::ComboActionBegin()
 	ComboActionMontage = CurrentWeaponData->AttackMontage;
 	
 	// 애니메이션 설정: 콤보 애니메이션 몽타주 재생
-	const float AttackSpeedRate = 1.f;
+	const float AttackSpeedRate = 1.2f;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
 
@@ -231,7 +231,6 @@ void AECharacterBase::AttackHitCheck()
 	{
 		FDamageEvent DamageEvent;
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
-		UE_LOG(LogTemp, Display, TEXT("Damage : %f"), AttackDamage);
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.
@@ -276,8 +275,17 @@ float AECharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	// 캐릭터의 스탯 컴포넌트에 데미지를 반영합니다.
 	Stat->ApplyDamage(DamageAmount);
 
+	if (bIsStaggerInProgress)
+	{
+		CurrentStaggerGauge += DamageAmount;
+	}
+
 	// 적용된 데미지 값을 반환합니다.
 	return DamageAmount;
+}
+
+void AECharacterBase::CloseAttackHitCheck()
+{
 }
 
 void AECharacterBase::SetDead()

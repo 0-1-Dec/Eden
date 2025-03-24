@@ -40,11 +40,23 @@ void AECharacterNonPlayer::BeginPlay()
 	}
 }
 
+void AECharacterNonPlayer::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	Stat->SetMaxHp(100.f);
+}
 
 void AECharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
 
+
+	if (AEAIGeneralController* AEIController = Cast<AEAIGeneralController>(GetController()))
+	{
+		AEIController->StopGeneralAI();
+	}
+  
 	//경험치 테스트 부분 (추후 변경!)
 	if(GEngine)
 	{
@@ -100,6 +112,7 @@ void AECharacterNonPlayer::SetAIAttackDelegate(const FGeneralAIAttackFinished& I
 
 void AECharacterNonPlayer::AttackByAI()
 {
+	UE_LOG(LogTemp, Warning, TEXT("AttackByAI called"));
 	ProcessComboCommand();
 }
 

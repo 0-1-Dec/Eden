@@ -97,6 +97,9 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetMaxHp(float NewMaxHp) { BaseMaxHp = NewMaxHp; CurrentHp = BaseMaxHp; }
+	
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetCurrentLevel() const { return CurrentLevel; }
 
 	UFUNCTION(BlueprintCallable)
