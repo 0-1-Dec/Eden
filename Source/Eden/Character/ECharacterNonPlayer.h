@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Character/ECharacterBase.h"
 #include "Interface/EGeneralAIInterface.h"
+#include "Components/WidgetComponent.h"
+#include "UI/EEnemyHPBarWidget.h"
 #include "ECharacterNonPlayer.generated.h"
 
 /**
@@ -19,6 +21,7 @@ public:
 	AECharacterNonPlayer();
 
 protected:
+	void BeginPlay() override;
 	void SetDead() override;
 
 protected:
@@ -33,4 +36,8 @@ protected:
 	FGeneralAIAttackFinished OnAttackFinished;
 
 	virtual void NotifyComboActionEnd() override;
+
+public:
+	UPROPERTY(VisibleAnywhere,Category = UI)
+	class UWidgetComponent* HealthBarWidget; //적 체력바
 };

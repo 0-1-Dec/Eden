@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameData/StatDataRow.h"
 #include "ECharacterStatComponent.generated.h"
 
 // HP가 0이 되었을 때 발생하는 이벤트 델리게이트 선언
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 
 // HP가 변경될 때 호출되며, 변경된 HP 값을 전달하는 이벤트 델리게이트 선언
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate,float,NewHp);
 
 // UECharacterStatComponent 클래스는 캐릭터의 스탯(예: HP, 공격 사거리 등)을 관리하는 컴포넌트입니다.
 // Blueprint에서 스폰이 가능하도록 meta 설정을 포함하고 있습니다.
@@ -33,6 +34,7 @@ public:
 	FOnHpZeroDelegate OnHpZero;
 
 	// HP가 변경될 때마다 호출되는 델리게이트 (파라미터: 변경된 HP 값)
+	UPROPERTY(BlueprintAssignable)
 	FOnHpChangedDelegate OnHpChanged;
 
 	// 인라인 함수: 현재 HP 값을 반환합니다.
@@ -66,9 +68,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
 	int32 CurrentExp = 0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
-	int32 ExpToNextLevel = 100;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Level)
@@ -126,4 +125,10 @@ protected:
 	void CheckLevelUp();
 
 	void LevelUp();
+
+public:
+	UPROPERTY(EditAnywhere,Category = "Stat")
+	UDataTable* StatDataTable;
+
+	const FStatDataRow* GetStatRow(int32 Level) const;
 };

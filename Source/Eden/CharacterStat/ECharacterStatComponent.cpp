@@ -1,4 +1,5 @@
 #include "CharacterStat/ECharacterStatComponent.h"
+#include "GameData/StatDataRow.h"
 
 // 생성자: 컴포넌트의 기본 속성을 설정합니다.
 UECharacterStatComponent::UECharacterStatComponent()
@@ -8,6 +9,13 @@ UECharacterStatComponent::UECharacterStatComponent()
 
 	// 컴포넌트가 게임 시작 시 자동으로 InitializeComponent() 함수를 호출하도록 설정합니다.
 	bWantsInitializeComponent = true;
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_Stat(TEXT("/Script/Engine.DataTable'/Game/Eden/GameData/StatData/StatDataFile.StatDataFile'"));
+
+	if(DT_Stat.Succeeded())
+	{
+		StatDataTable = DT_Stat.Object;
+	}
 }
 
 // InitializeComponent: 컴포넌트가 초기화될 때 호출되며, 초기화 작업을 수행합니다.
@@ -57,7 +65,7 @@ void UECharacterStatComponent::SetHp(float NewHp)
 
 void UECharacterStatComponent::AddExp(int32 InExp)
 {
-	CurrentHp += InExp;
+	CurrentExp += InExp;
 
 	CheckLevelUp();
 }
@@ -92,9 +100,9 @@ void UECharacterStatComponent::DistributeStatPoint(FName StatName, float Amount)
 
 void UECharacterStatComponent::CheckLevelUp()
 {
-	if (CurrentHp >= ExpToNextLevel)
+	if (CurrentExp >= GetStatRow(CurrentLevel)->ExpToNextLevel)
 	{
-		CurrentExp -= ExpToNextLevel;
+		CurrentExp -= GetStatRow(CurrentLevel)->ExpToNextLevel;
 		LevelUp();
 	}
 }
@@ -103,7 +111,15 @@ void UECharacterStatComponent::LevelUp()
 {
 	CurrentLevel += 1;
 
-	ExpToNextLevel = CurrentLevel * 100;
-
 	RemainStatPoint += StatPointPerLevel;
+
+	UE_LOG(LogTemp,Warning,TEXT("LEVEL UP!!"));
+}
+
+const FStatDataRow* UECharacterStatComponent::GetStatRow(int32 Level) const  //데이터 테이블 불러오는 함수!!
+{
+	if(!StatDataTable) return nullptr;
+
+	FName RowName = FName(*FString::FromInt(Level));
+	return StatDataTable->FindRow<FStatDataRow>(RowName,TEXT(""));
 }
