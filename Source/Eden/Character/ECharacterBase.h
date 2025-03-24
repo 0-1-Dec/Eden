@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/EAnimationAttackInterface.h"
-#include "GameData/WeaponDataAsset.h"
+#include "GameData/EWeaponDataAsset.h"
 #include "ECharacterBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, UWeaponDataAsset*, NewWeaponData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, UEWeaponDataAsset*, NewWeaponData);
 
 // AECharacterBase 클래스는 ACharacter를 상속받아 게임 캐릭터의 기본 동작을 구현하며,
 // IEAnimationAttackInterface를 구현하여 애니메이션 공격 관련 기능을 제공합니다.
@@ -31,9 +31,9 @@ public:
 	// =========================================================================================
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Weapon,meta=(AllowPrivateAccess="true"))
-	UWeaponDataAsset* CurrentWeaponData;
+	UEWeaponDataAsset* CurrentWeaponData;
 
-	void SetWeaponData(UWeaponDataAsset* NewWeaponData);
+	void SetWeaponData(UEWeaponDataAsset* NewWeaponData);
 
 	// =========================================================================================
 	// 콤보 애니메이션 섹션
@@ -92,6 +92,8 @@ protected:
 	// DamageCauser: 피해를 입힌 액터
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	virtual void CloseAttackHitCheck() override;
+
 	// =========================================================================================
 	// 활 관련 섹션
 	// =========================================================================================
@@ -121,4 +123,8 @@ protected:
 	// 에디터에서 볼 수 있으나 블루프린트에서는 읽기 전용으로 설정되어 있습니다.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPricateAccess = "true"))
 	TObjectPtr<class UECharacterStatComponent> Stat;
+
+public:
+	bool bIsStaggerInProgress = false;
+	float CurrentStaggerGauge = 0.f;
 };

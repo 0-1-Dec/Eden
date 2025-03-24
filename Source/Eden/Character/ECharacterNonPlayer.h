@@ -18,6 +18,8 @@ class EDEN_API AECharacterNonPlayer : public AECharacterBase, public IEGeneralAI
 public:
 	AECharacterNonPlayer();
 
+	virtual void PostInitializeComponents() override;
+
 protected:
 	void SetDead() override;
 

@@ -3,6 +3,7 @@
 
 #include "Character/ECharacterNonPlayer.h"
 #include "AI/GeneralAI/EAIGeneralController.h"
+#include "CharacterStat/ECharacterStatComponent.h"
 
 AECharacterNonPlayer::AECharacterNonPlayer()
 {
@@ -10,9 +11,21 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
+void AECharacterNonPlayer::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	Stat->SetMaxHp(100.f);
+}
+
 void AECharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
+
+	if (AEAIGeneralController* AEIController = Cast<AEAIGeneralController>(GetController()))
+	{
+		AEIController->StopGeneralAI();
+	}
 
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(
@@ -50,6 +63,7 @@ void AECharacterNonPlayer::SetAIAttackDelegate(const FGeneralAIAttackFinished& I
 
 void AECharacterNonPlayer::AttackByAI()
 {
+	UE_LOG(LogTemp, Warning, TEXT("AttackByAI called"));
 	ProcessComboCommand();
 }
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/ECharacterBase.h"
 #include "InputActionValue.h"
-#include "GameData/WeaponDataAsset.h"
+#include "GameData/EWeaponDataAsset.h"
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
 #include "ECharacterPlayer.generated.h"
@@ -76,13 +76,13 @@ protected:
 // 무기스왑 애니메이션
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	UWeaponDataAsset* OneHandedData;
+	UEWeaponDataAsset* OneHandedData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	UWeaponDataAsset* BowData;
+	UEWeaponDataAsset* BowData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	UWeaponDataAsset* BothHandedData;
+	UEWeaponDataAsset* BothHandedData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
 	UAnimMontage* WeaponSwapMontage_OneHanded;
@@ -93,13 +93,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
 	UAnimMontage* WeaponSwapMontage_BothHanded;
 
-	UWeaponDataAsset* PendingWeaponData;
+	UEWeaponDataAsset* PendingWeaponData;
 
 	void SwapOneHanded();
 	void SwapBow();
 	void SwapBothHanded();
 
-	void PlayWeaponSwapMontage(UWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
+	void PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
 	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	// 인벤토리 섹션
@@ -129,5 +129,5 @@ public:
 	void BowZoomIn();
 	void BowZoomOut();
 
-	void AttackSpeedChange(UWeaponDataAsset* NewWeaponData, float AttackSpeed);
+	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
 };

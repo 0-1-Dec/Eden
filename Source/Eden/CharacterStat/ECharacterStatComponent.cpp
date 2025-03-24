@@ -49,7 +49,7 @@ float UECharacterStatComponent::ApplyDamage(float InDamage)
 void UECharacterStatComponent::SetHp(float NewHp)
 {
 	// NewHp 값을 0과 최대 HP 값(200) 사이로 제한하여 CurrentHp에 저장합니다.
-	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, 200.f);
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, BaseMaxHp);
 
 	// HP가 변경되었음을 알리기 위해 OnHpChanged 이벤트를 발생시킵니다.
 	OnHpChanged.Broadcast(CurrentHp);
