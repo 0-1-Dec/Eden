@@ -9,6 +9,7 @@
 
 // HP가 0이 되었을 때 발생하는 이벤트 델리게이트 선언
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExpGainDelegate, int32, InExp);
 
 // HP가 변경될 때 호출되며, 변경된 HP 값을 전달하는 이벤트 델리게이트 선언
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate,float,NewHp);
@@ -37,11 +38,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHpChangedDelegate OnHpChanged;
 
+	FOnExpGainDelegate OnExpGain;
+
 	// 인라인 함수: 현재 HP 값을 반환합니다.
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
-
-	// 인라인 함수: 공격 사거리 값을 반환합니다.
-	FORCEINLINE float GetAttackRadius() const { return AttackRadius; }
 
 	// ApplyDamage: 외부에서 데미지를 적용할 때 호출되는 함수.
 	// 데미지 값(InDamage)을 받아 HP를 차감하고, 관련 이벤트를 발생시킵니다.
@@ -68,13 +68,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
 	int32 CurrentExp = 0;
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Level)
-	int32 StatPointPerLevel = 3;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Level)
-	int32 RemainStatPoint = 0;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
@@ -104,25 +97,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32  GetCurrentExp() const { return CurrentExp; }
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE int32 GetRemainStatPoint() const { return RemainStatPoint; }
-
+	
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetMaxHp() const { return BaseMaxHp + BonusMaxHp; }
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetAttack() const { return BaseAttack + BonusAttack; }
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetDefense() const { return BaseDefense + BonusDefense; }
 
 public:
 	UFUNCTION(BlueprintCallable)
 	void AddExp(int32 InExp);
-
-	UFUNCTION(BlueprintCallable)
-	void DistributeStatPoint(FName StatName, float Amount);
 
 protected:
 	void CheckLevelUp();

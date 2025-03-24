@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
+#include "CharacterStat/ECharacterStatComponent.h"
 #include "Inventory/EInventoryComponent.h"
 
 AECharacterPlayer::AECharacterPlayer()
@@ -97,6 +98,8 @@ void AECharacterPlayer::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+
+	Stat->OnExpGain.AddDynamic(this, &AECharacterPlayer::ExpGain);
 
 	SetWeaponData(OneHandedData);
 }
@@ -298,4 +301,9 @@ void AECharacterPlayer::BowZoomOut(){
 
 void AECharacterPlayer::AttackSpeedChange(UEWeaponDataAsset* WeaponData, float AttackSpeed){
 	WeaponData->AttackSpeed = AttackSpeed;
+}
+
+void AECharacterPlayer::ExpGain(int32 InExp)
+{
+	Stat->AddExp(InExp);
 }

@@ -2,9 +2,12 @@
 
 
 #include "Character/ECharacterNonPlayer.h"
+
+#include "ECharacterPlayer.h"
 #include "AI/GeneralAI/EAIGeneralController.h"
 #include "Components/WidgetComponent.h"
 #include "CharacterStat/ECharacterStatComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AECharacterNonPlayer::AECharacterNonPlayer()
 {
@@ -12,15 +15,17 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(RootComponent);
+	HealthBarWidget->SetupAttachment(GetMesh());
 	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
-	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
 	if(UI_HUD.Succeeded())
 	{
 		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
-		HealthBarWidget->SetDrawSize(FVector2D(150.0f,50.0f));
+		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
+		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	} else
 	{
 		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
@@ -58,23 +63,32 @@ void AECharacterNonPlayer::SetDead()
 	}
   
 	//경험치 테스트 부분 (추후 변경!)
-	if(GEngine)
+	// if(GEngine)
+	// {
+	// 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	// 	{
+	// 		if(APlayerController* PC = It->Get())
+	// 		{
+	// 			if(APawn* Pawn = PC->GetPawn())
+	// 			{
+	// 				if(UECharacterStatComponent* TempStat = Pawn->FindComponentByClass<UECharacterStatComponent>())
+	// 				{
+	// 					TempStat->AddExp(200);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+	//테스트 끝
+
+	AECharacterPlayer* Player = Cast<AECharacterPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if (Player)
 	{
-		for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+		if (UECharacterStatComponent* StatComponent = Player->FindComponentByClass<UECharacterStatComponent>())
 		{
-			if(APlayerController* PC = It->Get())
-			{
-				if(APawn* Pawn = PC->GetPawn())
-				{
-					if(UECharacterStatComponent* TempStat = Pawn->FindComponentByClass<UECharacterStatComponent>())
-					{
-						TempStat->AddExp(200);
-					}
-				}
-			}
+			StatComponent->OnExpGain.Broadcast(200.f);
 		}
 	}
-	//테스트 끝
 
 	FTimerHandle DeadTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda(

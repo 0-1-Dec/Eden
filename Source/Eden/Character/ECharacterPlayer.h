@@ -130,4 +130,9 @@ public:
 	void BowZoomOut();
 
 	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
+
+	// 경험치 섹션
+protected:
+	UFUNCTION()
+	void ExpGain(int32 InExp);
 };

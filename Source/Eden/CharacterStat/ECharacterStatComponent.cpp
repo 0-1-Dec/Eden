@@ -70,34 +70,6 @@ void UECharacterStatComponent::AddExp(int32 InExp)
 	CheckLevelUp();
 }
 
-void UECharacterStatComponent::DistributeStatPoint(FName StatName, float Amount)
-{
-	if (RemainStatPoint <= 0 || Amount <= 0)
-	{
-		return;
-	}
-
-	float UsedPoint = FMath::Clamp<float>(Amount, 0, static_cast<float>(RemainStatPoint));
-
-	if (StatName == "Hp")
-	{
-		BonusMaxHp += UsedPoint;
-	}
-	else if (StatName == "Attack")
-	{
-		BonusAttack += UsedPoint;
-	}
-	else if (StatName == "Defense")
-	{
-		BonusDefense += UsedPoint;
-	}
-
-	RemainStatPoint -= static_cast<int32>(UsedPoint);
-
-	CurrentHp = FMath::Min(CurrentHp, GetMaxHp());
-	OnHpChanged.Broadcast(CurrentHp);
-}
-
 void UECharacterStatComponent::CheckLevelUp()
 {
 	if (CurrentExp >= GetStatRow(CurrentLevel)->ExpToNextLevel)
@@ -110,8 +82,6 @@ void UECharacterStatComponent::CheckLevelUp()
 void UECharacterStatComponent::LevelUp()
 {
 	CurrentLevel += 1;
-
-	RemainStatPoint += StatPointPerLevel;
 
 	UE_LOG(LogTemp,Warning,TEXT("LEVEL UP!!"));
 }
