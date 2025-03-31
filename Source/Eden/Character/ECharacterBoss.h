@@ -20,7 +20,7 @@ public:
 	AECharacterBoss();
 
 protected:
-	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
 
 protected:
 	virtual void SetDead() override;
@@ -50,4 +50,10 @@ protected:
 	FBaseAttackFinished OnAttackFinished;
 
 	virtual void NotifyComboActionEnd() override;
+
+public:
+	UPROPERTY(VisibleAnywhere,Category = UI)
+	class UWidgetComponent* HealthBarWidget; //적 체력바
+
+	void HealUp(float Amount);
 };

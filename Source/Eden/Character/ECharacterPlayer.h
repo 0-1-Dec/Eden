@@ -135,4 +135,10 @@ public:
 protected:
 	UFUNCTION()
 	void ExpGain(int32 InExp);
+
+	// UI
+public:
+public:
+	UPROPERTY(VisibleAnywhere,Category = UI)
+	class UWidgetComponent* HealthBarWidget;
 };

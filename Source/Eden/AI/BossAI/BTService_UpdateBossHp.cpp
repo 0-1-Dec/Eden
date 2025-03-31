@@ -39,12 +39,14 @@ void UBTService_UpdateBossHp::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	const float MaxHp = StatComp->GetMaxHp();
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(BBKEY_BOSSHP, CurrentHp / MaxHp * 100.0f);
 
-	if ((CurrentHp / MaxHp * 100.f) <= 70.0f)
+	int32 CurrentPhase = OwnerComp.GetBlackboardComponent()->GetValueAsInt(BBKEY_PHASEINDEX);
+	
+	if ((CurrentHp / MaxHp * 100.f) <= 60.0f && CurrentPhase < 2)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsInt(BBKEY_PHASEINDEX, 2);
 	}
 	
-	if ((CurrentHp / MaxHp * 100.f) <= 30.0f)
+	if ((CurrentHp / MaxHp * 100.f) <= 25.0f && CurrentPhase < 3)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsInt(BBKEY_PHASEINDEX, 3);
 	}

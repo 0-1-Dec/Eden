@@ -79,7 +79,6 @@ void UBTTask_StaggerPattern::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* 
 		Boss->bIsStaggerInProgress = false;
 		bIsTaskActive = false;
 		Boss->GetCharacterMovement()->SetMovementMode(MOVE_NavWalking);
-		UE_LOG(LogTemp, Warning, TEXT("End"));
 		Boss->CurrentStaggerGauge = 0.f;
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
@@ -88,7 +87,6 @@ void UBTTask_StaggerPattern::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* 
 	{
 		Boss->bIsStaggerInProgress = false;
 		bIsTaskActive = false;
-		UE_LOG(LogTemp, Warning, TEXT("Fail End"));
 		Boss->GetCharacterMovement()->SetMovementMode(MOVE_NavWalking);
 		Boss->CurrentStaggerGauge = 0.f;
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);

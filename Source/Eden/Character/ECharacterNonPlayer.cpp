@@ -18,7 +18,6 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 	HealthBarWidget->SetupAttachment(GetMesh());
 	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
 	
-
 	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
 	if(UI_HUD.Succeeded())
 	{
@@ -26,7 +25,8 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
 		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	} else
+	}
+	else
 	{
 		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
 	}

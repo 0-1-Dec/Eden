@@ -12,6 +12,12 @@ class EDEN_API UEEnemyHPBarWidget: public UUserWidget
     GENERATED_BODY()
 
 public:
+    UEEnemyHPBarWidget(const FObjectInitializer& ObjectInitializer);
+
+protected:
+    virtual void NativeConstruct() override;
+
+public:
     UFUNCTION(BlueprintCallable)
     void BindStatComponent(UECharacterStatComponent* InStatComp);
 
@@ -19,8 +25,14 @@ public:
     void UpdateHpBar(float NewHp);
 
 protected:
-    UPROPERTY(meta = (BindWidget))
-    class UProgressBar* HpProgressBar;
+    UPROPERTY()
+    TObjectPtr<class UProgressBar> HpProgressBar;
+
+    UPROPERTY()
+    float CurrentHp;
+
+    UPROPERTY()
+    float MaxHp;
 
 private:
     TWeakObjectPtr<UECharacterStatComponent> CurrentStatComp;

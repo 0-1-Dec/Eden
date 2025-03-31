@@ -38,10 +38,3 @@ void AEBossAIController::StopBossAI()
 		BTComponent->StopTree();
 	}
 }
-
-void AEBossAIController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	RunBossAI();
-}
