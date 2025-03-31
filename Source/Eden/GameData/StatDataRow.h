@@ -17,4 +17,13 @@ public:
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Level)
     int32 ExpToNextLevel;
+
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
+    int32 BaseAttack;
+
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
+    int32 BaseDefence;
+
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
+    int32 StatPoint;
 };
