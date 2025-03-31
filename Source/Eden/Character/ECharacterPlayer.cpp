@@ -9,7 +9,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterStat/ECharacterStatComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Inventory/EInventoryComponent.h"
+#include "UI/EEnemyHPBarWidget.h"
 
 AECharacterPlayer::AECharacterPlayer()
 {
@@ -87,6 +89,19 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		BowZoomAction = InputBowZoomRef.Object;
 	}
+
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidget->SetupAttachment(GetMesh());
+	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
+	
+	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
+	if(UI_HUD.Succeeded())
+	{
+		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
+		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
+		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -100,6 +115,14 @@ void AECharacterPlayer::BeginPlay()
 	}
 
 	Stat->OnExpGain.AddDynamic(this, &AECharacterPlayer::ExpGain);
+
+	if(UUserWidget* Widget = HealthBarWidget->GetUserWidgetObject())
+	{
+		if(UEEnemyHPBarWidget* HpBar = Cast<UEEnemyHPBarWidget>(Widget))
+		{
+			HpBar->BindStatComponent(Stat); // ECharacterBase에서 만든 Stat
+		}
+	}
 
 	SetWeaponData(OneHandedData);
 }

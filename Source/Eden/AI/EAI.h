@@ -12,3 +12,4 @@
 #define BBKEY_BOSSHP TEXT("BossHP")
 #define BBKEY_ISCASTING TEXT("IsCasting")
 #define BBKEY_WASATTACKED TEXT("WasAttacked")
+#define BBKEY_ISPROJECTILE TEXT("IsProjectile")
