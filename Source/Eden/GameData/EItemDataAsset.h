@@ -24,6 +24,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item)
 	bool bCanStack = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Item) 
 	int32 MaxStackSize = 1;
 };

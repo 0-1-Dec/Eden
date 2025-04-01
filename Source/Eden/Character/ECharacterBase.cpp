@@ -11,6 +11,7 @@
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Item/EArrow.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/DamageFloatingText.h"
 
 // Sets default values
 AECharacterBase::AECharacterBase()
@@ -231,6 +232,9 @@ void AECharacterBase::AttackHitCheck()
 	{
 		FDamageEvent DamageEvent;
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+
+		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage);
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.

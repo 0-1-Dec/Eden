@@ -7,6 +7,8 @@
 #include "Interface/EGeneralAIInterface.h"
 #include "Components/WidgetComponent.h"
 #include "UI/EEnemyHPBarWidget.h"
+#include "GameData/EDropDataAsset.h"
+#include "Item/EDroppedItem.h"
 #include "ECharacterNonPlayer.generated.h"
 
 /**
@@ -42,4 +44,12 @@ protected:
 public:
 	UPROPERTY(VisibleAnywhere,Category = UI)
 	class UWidgetComponent* HealthBarWidget; //적 체력바
+
+	UPROPERTY(EditAnywhere,Category = Drop)
+	UEDropDataAsset* DropData;  //드랍 아이템
+
+	virtual void HandleDrop(); //드랍 함수
+	UPROPERTY(EditAnywhere,Category = Drop)
+	TSubclassOf<AEDroppedItem> DroppedItemClass;
+
 };

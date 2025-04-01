@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Item\EDroppedItem.h"
 
 AECharacterNonPlayer::AECharacterNonPlayer()
 {
@@ -18,7 +19,6 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 	HealthBarWidget->SetupAttachment(GetMesh());
 	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
 	
-
 	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
 	if(UI_HUD.Succeeded())
 	{
@@ -26,7 +26,8 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
 		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	} else
+	}
+	else
 	{
 		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
 	}
@@ -61,32 +62,13 @@ void AECharacterNonPlayer::SetDead()
 	{
 		AEIController->StopGeneralAI();
 	}
-  
-	//경험치 테스트 부분 (추후 변경!)
-	// if(GEngine)
-	// {
-	// 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	// 	{
-	// 		if(APlayerController* PC = It->Get())
-	// 		{
-	// 			if(APawn* Pawn = PC->GetPawn())
-	// 			{
-	// 				if(UECharacterStatComponent* TempStat = Pawn->FindComponentByClass<UECharacterStatComponent>())
-	// 				{
-	// 					TempStat->AddExp(200);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	//테스트 끝
 
 	AECharacterPlayer* Player = Cast<AECharacterPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	if (Player)
 	{
 		if (UECharacterStatComponent* StatComponent = Player->FindComponentByClass<UECharacterStatComponent>())
 		{
-			StatComponent->OnExpGain.Broadcast(200.f);
+			HandleDrop();
 		}
 	}
 
@@ -134,4 +116,41 @@ void AECharacterNonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
 	OnAttackFinished.ExecuteIfBound();
+}
+
+
+void AECharacterNonPlayer::HandleDrop()
+{
+	if(!DropData) return;
+
+	// 경험치 지급
+	AECharacterPlayer* Player = Cast<AECharacterPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
+	if(Player)
+	{
+		if(UECharacterStatComponent* StatComponent = Player->FindComponentByClass<UECharacterStatComponent>())
+		{
+			StatComponent->OnExpGain.Broadcast(DropData->Exp);
+			//StatComponent->OnGoldGain.Broadcast(DropData->Gold); // 나중에 골드 추가 시 사용
+		}
+	}
+
+	// 아이템 드랍
+	for(const FDropEntry& Entry : DropData->DropItems)
+	{
+		if(Entry.Item.IsNull()) continue;
+		if(FMath::FRand() > Entry.DropChance) continue;
+
+		int32 Count = FMath::RandRange(Entry.MinCount,Entry.MaxCount);
+		UEItemDataAsset* ItemAsset = Entry.Item.LoadSynchronous();
+		if(!ItemAsset) continue;
+
+		FVector SpawnLoc = GetActorLocation();
+		FRotator SpawnRot = FRotator::ZeroRotator;
+
+		AEDroppedItem* DroppedItem = GetWorld()->SpawnActor<AEDroppedItem>(DroppedItemClass,SpawnLoc,SpawnRot);
+		if(DroppedItem)
+		{
+			DroppedItem->Init(ItemAsset,Count);
+		}
+	}
 }

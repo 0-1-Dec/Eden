@@ -20,9 +20,6 @@ public:
 	void RunBossAI();
 	void StopBossAI();
 
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
-
 private:
 	UPROPERTY()
 	TObjectPtr<class UBlackboardData> BBBossAsset;

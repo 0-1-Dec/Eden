@@ -5,9 +5,11 @@
 #include "AI/BossAI/EBossAIController.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/ECollision.h"
+#include "UI/EEnemyHPBarWidget.h"
 
 AECharacterBoss::AECharacterBoss()
 {
@@ -38,15 +40,44 @@ AECharacterBoss::AECharacterBoss()
 		BossWeapon = BossWeaponDataRef.Object;;
 	}
 
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidget->SetupAttachment(GetMesh());
+	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
+	
+	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
+	if(UI_HUD.Succeeded())
+	{
+		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
+		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
+		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	} else
+	{
+		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
+	}
+
 	bIsStaggerInProgress = false;
 	CurrentStaggerGauge = 0;
 }
 
-void AECharacterBoss::PostInitializeComponents()
+void AECharacterBoss::BeginPlay()
 {
-	Super::PostInitializeComponents();
+	Super::BeginPlay();
 
 	Stat->SetMaxHp(1500.f);
+	
+	if(UUserWidget* Widget = HealthBarWidget->GetUserWidgetObject())
+	{
+		if(UEEnemyHPBarWidget* HpBar = Cast<UEEnemyHPBarWidget>(Widget))
+		{
+			HpBar->BindStatComponent(Stat); // ECharacterBase에서 만든 Stat
+		}
+	}
+
+	if (AEBossAIController* BossAIController = Cast<AEBossAIController>(GetController()))
+	{
+		BossAIController->RunBossAI();
+	}
 }
 
 void AECharacterBoss::SetDead()
@@ -101,6 +132,11 @@ void AECharacterBoss::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
 	OnAttackFinished.ExecuteIfBound();
+}
+
+void AECharacterBoss::HealUp(float Amount)
+{
+	Stat->HealUp(Amount);
 }
 
 void AECharacterBoss::CloseAttackHitCheck()
