@@ -68,6 +68,9 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> BowZoomAction;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> OpenStatAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 

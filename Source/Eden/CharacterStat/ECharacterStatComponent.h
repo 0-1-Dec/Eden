@@ -117,4 +117,7 @@ public:
 	UDataTable* StatDataTable;
 
 	const FStatDataRow* GetStatRow(int32 Level) const;
+
+public:
+	int32 StatPoints = 3;
 };
