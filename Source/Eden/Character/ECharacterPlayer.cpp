@@ -89,8 +89,13 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		BowZoomAction = InputBowZoomRef.Object;
 	}
-
-<<<<<<< Updated upstream
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputOpenStatRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_OpenStat.IA_OpenStat'"));
+	if(nullptr != InputOpenStatRef.Object)
+	{
+		OpenStatAction = InputOpenStatRef.Object;
+	}
+	
 	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
 	HealthBarWidget->SetupAttachment(GetMesh());
 	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
@@ -102,12 +107,6 @@ AECharacterPlayer::AECharacterPlayer()
 		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
 		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-=======
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputOpenStatRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_OpenStat.IA_OpenStat'"));
-	if(nullptr != InputOpenStatRef.Object)
-	{
-		OpenStatAction = InputOpenStatRef.Object;
->>>>>>> Stashed changes
 	}
 }
 
@@ -340,42 +339,3 @@ void AECharacterPlayer::ExpGain(int32 InExp)
 	Stat->AddExp(InExp);
 }
 
-void AECharacterPlayer::BowZoomIn()
-{
-	if(bIsBow){
-		if(!CrosshairWidgetInstance && CrosshairWidgetClass)
-		{
-			APlayerController* PC = Cast<APlayerController>(GetController());
-			if(PC)
-			{
-				CrosshairWidgetInstance = CreateWidget<UECrosshairWidget>(PC,CrosshairWidgetClass);
-			}
-		}
-
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		if(CrosshairWidgetInstance)
-		{
-
-			CrosshairWidgetInstance->AddToViewport();
-			UE_LOG(LogTemp,Log,TEXT("Crosshair On"));
-		}
-
-		FollowCamera -> SetFieldOfView(60.f);
-		AttackSpeedChange(CurrentWeaponData,1);
-	} else
-	{
-		BowZoomOut();
-	}
-}
-
-void AECharacterPlayer::BowZoomOut(){
-	FollowCamera -> SetFieldOfView(90.f);
-
-	if(CrosshairWidgetInstance)
-	{
-
-		CrosshairWidgetInstance->RemoveFromViewport();
-		UE_LOG(LogTemp,Log,TEXT("Crosshair Off"));
-	}
-	AttackSpeedChange(CurrentWeaponData,1000);
-}
