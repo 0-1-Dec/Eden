@@ -252,23 +252,6 @@ void AECharacterBase::AttackHitCheck()
 #endif
 }
 
-void AECharacterBase::ShootArrow()
-{
-	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket")) + GetActorForwardVector();
-	FRotator MuzzleRotation = GetActorRotation();
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
-
-	AEArrow* Projectile = GetWorld()->SpawnActor<AEArrow>(ArrowBP, MuzzleLocation, MuzzleRotation, SpawnParams);
-
-	if (Projectile)
-	{
-		Projectile->InitProjectile(200.f, 2000.f);
-	}
-}
-
 // TakeDamage: 캐릭터가 데미지를 받을 때 호출되는 함수입니다.
 // - 상위 클래스의 TakeDamage를 호출한 후, Stat 컴포넌트에 데미지를 적용합니다.
 float AECharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

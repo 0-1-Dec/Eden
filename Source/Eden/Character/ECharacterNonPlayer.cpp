@@ -5,45 +5,33 @@
 
 #include "ECharacterPlayer.h"
 #include "AI/GeneralAI/EAIGeneralController.h"
-#include "Components/WidgetComponent.h"
+#include "UI/EWidgetComponent.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item\EDroppedItem.h"
+#include "UI/EHpBarWidget.h"
 
 AECharacterNonPlayer::AECharacterNonPlayer()
 {
 	AIControllerClass = AEAIGeneralController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(GetMesh());
-	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
-	
-	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
-	if(UI_HUD.Succeeded())
+	HpBar = CreateDefaultSubobject<UEWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0, 0, 250.0f));
+	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/Eden/UI/WBP_HpBarWidget.WBP_HpBarWidget_C"));
+	if (HpBarWidgetRef.Class)
 	{
-		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
-		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
-		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(100.f, 10.f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
 void AECharacterNonPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if(UUserWidget* Widget = HealthBarWidget->GetUserWidgetObject())
-	{
-		if(UEEnemyHPBarWidget* HpBar = Cast<UEEnemyHPBarWidget>(Widget))
-		{
-			HpBar->BindStatComponent(Stat); // ECharacterBase에서 만든 Stat
-		}
-	}
 }
 
 void AECharacterNonPlayer::PostInitializeComponents()
@@ -108,7 +96,6 @@ void AECharacterNonPlayer::SetAIAttackDelegate(const FGeneralAIAttackFinished& I
 
 void AECharacterNonPlayer::AttackByAI()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AttackByAI called"));
 	ProcessComboCommand();
 }
 
@@ -152,5 +139,16 @@ void AECharacterNonPlayer::HandleDrop()
 		{
 			DroppedItem->Init(ItemAsset,Count);
 		}
+	}
+}
+
+void AECharacterNonPlayer::SetUpCharacterWidget(class UEUserWidget* InUserWidget)
+{
+	if (UEHpBarWidget* HpBarWidget = Cast<UEHpBarWidget>(InUserWidget))
+	{
+		HpBarWidget->BindStatComponent(Stat);
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+		UE_LOG(LogTemp, Warning, TEXT("%f"), Stat->GetCurrentHp());
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UEHpBarWidget::UpdateHpBar);
 	}
 }

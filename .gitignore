@@ -2,6 +2,9 @@ Binaries
 DerivedDataCache
 Intermediate
 Saved
+Plugins
+Content/PostApocalypticMeleeWeapons
+Content/ModernCityBundle
 .vscode
 .vs
 *.VC.db

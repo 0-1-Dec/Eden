@@ -82,4 +82,10 @@ protected:
 	// 이 값은 점프 애니메이션 전환 및 관련 로직에 활용될 수 있습니다.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshould;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsBow : 1;
+
+public:
+	void SetBow(bool bIsTrue);
 };

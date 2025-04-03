@@ -30,6 +30,9 @@ public:
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> QuantityText;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	UTexture2D* Icon;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FEInventorySlot SlotData;

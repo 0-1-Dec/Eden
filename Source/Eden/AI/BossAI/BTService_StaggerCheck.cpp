@@ -54,6 +54,7 @@ void UBTService_StaggerCheck::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	if (BossHP <= 85.0f && !bIsTriggered85)
 	{
 		UE_LOG(LogTemp, Log, TEXT("[StaggerCheck] HP 85%% 이하 진입! 무력화 트리거"));
+		UE_LOG(LogTemp, Log, TEXT("%f"), BossHP);
 		BBComp->SetValueAsBool(BBKEY_ISSTAGGERED, true);
 		Boss->bIsStaggerInProgress = true;
 		bIsTriggered85 = true;
@@ -63,6 +64,7 @@ void UBTService_StaggerCheck::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	if (BossHP <= 75.0f && !bIsTriggered75)
 	{
 		UE_LOG(LogTemp, Log, TEXT("[StaggerCheck] HP 75%% 이하 진입! 무력화 트리거"));
+		UE_LOG(LogTemp, Log, TEXT("%f"), BossHP);
 		BBComp->SetValueAsBool(BBKEY_ISSTAGGERED, true);
 		Boss->bIsStaggerInProgress = true;
 		bIsTriggered75 = true;
