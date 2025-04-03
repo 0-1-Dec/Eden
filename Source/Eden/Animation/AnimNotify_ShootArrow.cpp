@@ -2,7 +2,7 @@
 
 
 #include "Animation/AnimNotify_ShootArrow.h"
-#include "Interface/EAnimationAttackInterface.h"
+#include "Interface/EAnimationBowInterface.h"
 
 void UAnimNotify_ShootArrow::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -10,7 +10,7 @@ void UAnimNotify_ShootArrow::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 
 	if (MeshComp)
 	{
-		IEAnimationAttackInterface* AttackPawn = Cast<IEAnimationAttackInterface>(MeshComp->GetOwner());
+		IEAnimationBowInterface* AttackPawn = Cast<IEAnimationBowInterface>(MeshComp->GetOwner());
 		if (AttackPawn)
 		{
 			AttackPawn->ShootArrow();

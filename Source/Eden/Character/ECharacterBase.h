@@ -100,7 +100,8 @@ protected:
 protected:
 	TSubclassOf<class AEArrow> ArrowBP;
 
-	virtual void ShootArrow() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	bool bIsBow = false;
 
 	// =========================================================================================
 	// Dead 애니메이션 섹션

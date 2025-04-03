@@ -6,15 +6,18 @@
 #include "Character/ECharacterBase.h"
 #include "InputActionValue.h"
 #include "GameData/EWeaponDataAsset.h"
+#include "Interface/EAnimationBowInterface.h"
+#include "Interface/ECharacterHUDInterface.h"
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
+#include "UI/EHUDWidget.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EDEN_API AECharacterPlayer : public AECharacterBase
+class EDEN_API AECharacterPlayer : public AECharacterBase, public IEAnimationBowInterface, public IECharacterHUDInterface
 {
 	GENERATED_BODY()
 	
@@ -71,6 +74,9 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> OpenStatAction;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> SkillAction;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
@@ -126,22 +132,33 @@ public:
 
 	UPROPERTY()
 	UECrosshairWidget* CrosshairWidgetInstance;
+	
+	bool bIsZoomedIn = false;
 
-	bool bIsBow = false;
+	virtual void ShootArrow() override;
+	virtual void LoopHold() override;
+	virtual void DrawAgain() override;
+
+	void AutoTransitionToShoot();
 
 	void BowZoomIn();
 	void BowZoomOut();
 
 	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
 
+	// 스킬 섹션
+protected:
+	void ExecuteSkill();
+	void BothHandedSkill();
+	void OneHandedSkill();
+	void BowSkill();
+
 	// 경험치 섹션
 protected:
 	UFUNCTION()
 	void ExpGain(int32 InExp);
-
-	// UI
-public:
-public:
-	UPROPERTY(VisibleAnywhere,Category = UI)
-	class UWidgetComponent* HealthBarWidget;
+	
+	// UI 섹션
+protected:
+	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
 };

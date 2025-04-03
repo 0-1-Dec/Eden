@@ -24,7 +24,5 @@ class EDEN_API IEAnimationAttackInterface
 public:
 	virtual void AttackHitCheck() = 0;
 
-	virtual void ShootArrow() = 0;
-
 	virtual void CloseAttackHitCheck() = 0;
 };

@@ -6,13 +6,14 @@
 #include "Character/ECharacterBase.h"
 #include "GameData/EItemDataAsset.h"
 #include "Interface/EBossAIInterface.h"
+#include "Interface/ECharacterWidgetInterface.h"
 #include "ECharacterBoss.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class EDEN_API AECharacterBoss : public AECharacterBase, public IEBossAIInterface
+class EDEN_API AECharacterBoss : public AECharacterBase, public IEBossAIInterface, public IECharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -51,9 +52,12 @@ protected:
 
 	virtual void NotifyComboActionEnd() override;
 
-public:
-	UPROPERTY(VisibleAnywhere,Category = UI)
-	class UWidgetComponent* HealthBarWidget; //적 체력바
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWidgetComponent> HpBar;
 
+	virtual void SetUpCharacterWidget(class UEUserWidget* InUserWidget) override;
+
+public:
 	void HealUp(float Amount);
 };
