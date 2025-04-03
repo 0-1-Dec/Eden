@@ -50,3 +50,8 @@ void UEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
 	}
 }
+
+void UEAnimInstance::SetBow(bool bIsTrue)
+{
+	bIsBow = bIsTrue;
+}

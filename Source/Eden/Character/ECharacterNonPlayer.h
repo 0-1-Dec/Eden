@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "UI/EEnemyHPBarWidget.h"
 #include "GameData/EDropDataAsset.h"
+#include "Interface/ECharacterWidgetInterface.h"
 #include "Item/EDroppedItem.h"
 #include "ECharacterNonPlayer.generated.h"
 
@@ -15,7 +16,7 @@
  * 
  */
 UCLASS()
-class EDEN_API AECharacterNonPlayer : public AECharacterBase, public IEGeneralAIInterface
+class EDEN_API AECharacterNonPlayer : public AECharacterBase, public IEGeneralAIInterface, public IECharacterWidgetInterface
 {
 	GENERATED_BODY()
 	
@@ -42,8 +43,8 @@ protected:
 	virtual void NotifyComboActionEnd() override;
 
 public:
-	UPROPERTY(VisibleAnywhere,Category = UI)
-	class UWidgetComponent* HealthBarWidget; //적 체력바
+	// UPROPERTY(VisibleAnywhere,Category = UI)
+	// class UWidgetComponent* HealthBarWidget; //적 체력바
 
 	UPROPERTY(EditAnywhere,Category = Drop)
 	UEDropDataAsset* DropData;  //드랍 아이템
@@ -52,4 +53,10 @@ public:
 	UPROPERTY(EditAnywhere,Category = Drop)
 	TSubclassOf<AEDroppedItem> DroppedItemClass;
 
+	// UI 섹션
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWidgetComponent> HpBar;
+
+	virtual void SetUpCharacterWidget(class UEUserWidget* InUserWidget) override;
 };

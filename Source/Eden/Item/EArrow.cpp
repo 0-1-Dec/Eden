@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/DamageFloatingText.h"
 
 // Sets default values
 AEArrow::AEArrow()
@@ -31,9 +32,11 @@ void AEArrow::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 {
 	if (OtherActor && OtherActor != this && OtherComp)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit %s"), *OtherActor->GetName());
 		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
 
+		FVector SpawnLoc = Hit.GetActor()->GetActorLocation() + FVector(0,0,100);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(Damage);
+		
 		Destroy();
 	}
 }

@@ -7,11 +7,15 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Animation/EAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/EInventoryComponent.h"
+#include "Item/EArrow.h"
 #include "UI/EEnemyHPBarWidget.h"
+#include "UI/EHUDWidget.h"
 
 AECharacterPlayer::AECharacterPlayer()
 {
@@ -95,18 +99,11 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		OpenStatAction = InputOpenStatRef.Object;
 	}
-	
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(GetMesh());
-	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
-	
-	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
-	if(UI_HUD.Succeeded())
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputSkillRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Skill.IA_Skill'"));
+	if(nullptr != InputSkillRef.Object)
 	{
-		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
-		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
-		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SkillAction = InputSkillRef.Object;
 	}
 }
 
@@ -121,14 +118,6 @@ void AECharacterPlayer::BeginPlay()
 	}
 
 	Stat->OnExpGain.AddDynamic(this, &AECharacterPlayer::ExpGain);
-
-	if(UUserWidget* Widget = HealthBarWidget->GetUserWidgetObject())
-	{
-		if(UEEnemyHPBarWidget* HpBar = Cast<UEEnemyHPBarWidget>(Widget))
-		{
-			HpBar->BindStatComponent(Stat); // ECharacterBase에서 만든 Stat
-		}
-	}
 
 	SetWeaponData(OneHandedData);
 }
@@ -164,10 +153,14 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Started, this, &AECharacterPlayer::ToggleInventoryUI);
 
 	// 활 줌
-	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Triggered,this,&AECharacterPlayer::BowZoomIn);
+	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Started,this,&AECharacterPlayer::BowZoomIn);
 	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Completed,this,&AECharacterPlayer::BowZoomOut);
 
+	// 스탯
 	EnhancedInputComponent->BindAction(OpenStatAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleInventoryUI);
+
+	// 스킬
+	EnhancedInputComponent->BindAction(SkillAction,ETriggerEvent::Started,this,&AECharacterPlayer::ExecuteSkill);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -191,28 +184,62 @@ void AECharacterPlayer::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
 
+	if (bIsZoomedIn)
+	{
+		FRotator ControlRot = Controller->GetControlRotation();
+		FRotator NewActorRot(0.f, ControlRot.Yaw, 0.f);
+		SetActorRotation(NewActorRot);
+	}
 }
 
 void AECharacterPlayer::Attack()
 {
-	ProcessComboCommand();
+	FTimerHandle TransitionTimerHandle;
+	if (bIsBow)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (!bIsZoomedIn)
+		{
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(BowData->AttackMontage);
+				GetWorld()->GetTimerManager().SetTimer(TransitionTimerHandle, this, &AECharacterPlayer::AutoTransitionToShoot, 1.4f, false);
+			}	
+		}
+		else
+		{
+			AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
+		}
+	}
+	else
+	{
+		ProcessComboCommand();	
+	}
+	
+	// ProcessComboCommand();
 }
 
 void AECharacterPlayer::SwapOneHanded()
 {
 	bIsBow = false;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(OneHandedData, WeaponSwapMontage_OneHanded);
 }
 
 void AECharacterPlayer::SwapBow()
 {
 	bIsBow = true;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(BowData, WeaponSwapMontage_Bow);
 }
 
 void AECharacterPlayer::SwapBothHanded()
 {
 	bIsBow = false;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
 }
 
@@ -275,7 +302,6 @@ void AECharacterPlayer::ToggleInventoryUI()
 		}
 		else
 		{
-			
 			InventoryWidgetInstance->AddToViewport();
 			bInventoryOpen = true;
 
@@ -287,6 +313,56 @@ void AECharacterPlayer::ToggleInventoryUI()
 	}
 
 	InventoryComponent->DebugPrintInventory();
+}
+
+void AECharacterPlayer::ShootArrow()
+{
+	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket")) + GetActorForwardVector();
+	FRotator MuzzleRotation = GetActorRotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.Instigator = GetInstigator();
+
+	AEArrow* Projectile = GetWorld()->SpawnActor<AEArrow>(ArrowBP, MuzzleLocation, MuzzleRotation, SpawnParams);
+
+	if (Projectile)
+	{
+		Projectile->InitProjectile(200.f, 2000.f);
+	}
+}
+
+void AECharacterPlayer::LoopHold()
+{
+	if (bIsZoomedIn)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_JumpToSection(FName("Hold"), BowData->AttackMontage);
+		}
+	}
+}
+
+void AECharacterPlayer::DrawAgain()
+{
+	if (bIsZoomedIn)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_JumpToSection(FName("DrawAgain"), BowData->AttackMontage);
+		}
+	}
+}
+
+void AECharacterPlayer::AutoTransitionToShoot()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
+	}
 }
 
 void AECharacterPlayer::BowZoomIn()
@@ -304,38 +380,96 @@ void AECharacterPlayer::BowZoomIn()
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		if(CrosshairWidgetInstance)
 		{
-
 			CrosshairWidgetInstance->AddToViewport();
-			UE_LOG(LogTemp,Log,TEXT("Crosshair On"));
 		}
 
-		FollowCamera -> SetFieldOfView(60.f);
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(BowData->AttackMontage);
+		}
+
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+		}
+
+		FollowCamera -> SetFieldOfView(30.f);
+
+		if (CameraBoom)
+		{
+			CameraBoom->SocketOffset = FVector(0.f, 50.f, 70.f);
+		}
+		
+		bIsZoomedIn = true;
 		AttackSpeedChange(CurrentWeaponData,1);
-	}
-	else
-	{
-		BowZoomOut();
 	}
 }
 
 void AECharacterPlayer::BowZoomOut(){
-	FollowCamera -> SetFieldOfView(90.f);
+	bIsZoomedIn = false;
 
 	if(CrosshairWidgetInstance)
 	{
-
 		CrosshairWidgetInstance->RemoveFromViewport();
-		UE_LOG(LogTemp,Log,TEXT("Crosshair Off"));
 	}
 	AttackSpeedChange(CurrentWeaponData,1000);
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
+	
+	FollowCamera -> SetFieldOfView(90.f);
 }
 
 void AECharacterPlayer::AttackSpeedChange(UEWeaponDataAsset* WeaponData, float AttackSpeed){
 	WeaponData->AttackSpeed = AttackSpeed;
 }
 
+void AECharacterPlayer::ExecuteSkill()
+{
+	if (CurrentWeaponData == BowData)
+	{
+		BowSkill();
+	}
+	else if (CurrentWeaponData == OneHandedData)
+	{
+		OneHandedSkill();
+	}
+	else
+	{
+		BothHandedSkill();
+	}
+}
+
+void AECharacterPlayer::BothHandedSkill()
+{
+	UE_LOG(LogTemp, Display, TEXT("BothHandedSkill"));
+}
+
+void AECharacterPlayer::OneHandedSkill()
+{
+	UE_LOG(LogTemp, Display, TEXT("OneHandedSkill"));
+}
+
+void AECharacterPlayer::BowSkill()
+{
+	UE_LOG(LogTemp, Display, TEXT("BowSkill"));
+}
+
 void AECharacterPlayer::ExpGain(int32 InExp)
 {
 	Stat->AddExp(InExp);
+}
+
+void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
+{
+	if (InHUDWidget)
+	{
+		InHUDWidget->BindStatComponent(Stat);
+		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+		Stat->OnHpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateHpBar);
+	}
 }
 

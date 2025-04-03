@@ -9,7 +9,10 @@
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Physics/ECollision.h"
+#include "UI/DamageFloatingText.h"
 #include "UI/EEnemyHPBarWidget.h"
+#include "UI/EHpBarWidget.h"
+#include "UI/EWidgetComponent.h"
 
 AECharacterBoss::AECharacterBoss()
 {
@@ -40,20 +43,16 @@ AECharacterBoss::AECharacterBoss()
 		BossWeapon = BossWeaponDataRef.Object;;
 	}
 
-	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
-	HealthBarWidget->SetupAttachment(GetMesh());
-	HealthBarWidget->SetRelativeLocation(FVector(0.0f,0.0f,200.0f));
-	
-	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Eden/UI/WBP_EnemyHpBar.WBP_EnemyHpBar_C"));
-	if(UI_HUD.Succeeded())
+	HpBar = CreateDefaultSubobject<UEWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0, 0, 250.0f));
+	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/Eden/UI/WBP_HpBarWidget.WBP_HpBarWidget_C"));
+	if (HpBarWidgetRef.Class)
 	{
-		HealthBarWidget->SetWidgetClass(UI_HUD.Class);
-		HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-		HealthBarWidget->SetDrawSize(FVector2D(100.0f,10.0f));
-		HealthBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	} else
-	{
-		UE_LOG(LogTemp,Error,TEXT("UI_HPBar 위젯 로딩 실패"));
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(100.f, 10.f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	bIsStaggerInProgress = false;
@@ -65,14 +64,6 @@ void AECharacterBoss::BeginPlay()
 	Super::BeginPlay();
 
 	Stat->SetMaxHp(1500.f);
-	
-	if(UUserWidget* Widget = HealthBarWidget->GetUserWidgetObject())
-	{
-		if(UEEnemyHPBarWidget* HpBar = Cast<UEEnemyHPBarWidget>(Widget))
-		{
-			HpBar->BindStatComponent(Stat); // ECharacterBase에서 만든 Stat
-		}
-	}
 
 	if (AEBossAIController* BossAIController = Cast<AEBossAIController>(GetController()))
 	{
@@ -134,11 +125,6 @@ void AECharacterBoss::NotifyComboActionEnd()
 	OnAttackFinished.ExecuteIfBound();
 }
 
-void AECharacterBoss::HealUp(float Amount)
-{
-	Stat->HealUp(Amount);
-}
-
 void AECharacterBoss::CloseAttackHitCheck()
 {
 	// 충돌 정보를 저장할 변수
@@ -164,6 +150,9 @@ void AECharacterBoss::CloseAttackHitCheck()
 	{
 		FDamageEvent DamageEvent;
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+
+		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage);
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.
@@ -199,4 +188,20 @@ float AECharacterBoss::GetAIAttackRange()
 float AECharacterBoss::GetAITurnSpeed()
 {
 	return 1.f;
+}
+
+void AECharacterBoss::SetUpCharacterWidget(class UEUserWidget* InUserWidget)
+{
+	if (UEHpBarWidget* HpBarWidget = Cast<UEHpBarWidget>(InUserWidget))
+	{
+		HpBarWidget->BindStatComponent(Stat);
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+		UE_LOG(LogTemp, Warning, TEXT("%f"), Stat->GetCurrentHp());
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UEHpBarWidget::UpdateHpBar);
+	}
+}
+
+void AECharacterBoss::HealUp(float Amount)
+{
+	Stat->HealUp(Amount);
 }
