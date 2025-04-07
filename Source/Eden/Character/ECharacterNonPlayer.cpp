@@ -7,14 +7,18 @@
 #include "AI/GeneralAI/EAIGeneralController.h"
 #include "UI/EWidgetComponent.h"
 #include "CharacterStat/ECharacterStatComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Item\EDroppedItem.h"
+#include "Physics/ECollision.h"
 #include "UI/EHpBarWidget.h"
 
 AECharacterNonPlayer::AECharacterNonPlayer()
 {
 	AIControllerClass = AEAIGeneralController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_ENPCCAPSULE);
 
 	HpBar = CreateDefaultSubobject<UEWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
@@ -148,7 +152,6 @@ void AECharacterNonPlayer::SetUpCharacterWidget(class UEUserWidget* InUserWidget
 	{
 		HpBarWidget->BindStatComponent(Stat);
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
-		UE_LOG(LogTemp, Warning, TEXT("%f"), Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UEHpBarWidget::UpdateHpBar);
 	}
 }

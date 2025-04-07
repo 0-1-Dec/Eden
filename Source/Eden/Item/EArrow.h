@@ -19,11 +19,14 @@ protected:
 	virtual void BeginPlay() override;
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = Arrow)
+	UStaticMeshComponent* ArrowMesh;
+	
 	UPROPERTY(VisibleAnywhere, Category = Movement)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = Collision)
-	class USphereComponent* CollisionComponent;
+	class UBoxComponent* CollisionComponent;
 
 public:
 	UFUNCTION()
