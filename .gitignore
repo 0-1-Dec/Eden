@@ -6,6 +6,9 @@ Plugins
 Content/PostApocalypticMeleeWeapons
 Content/ModernCityBundle
 Content/Eden/Maps/LevelDesign
+Content/Two_Handed_Sword
+Content/Medieval_Bows
+Content/EssentialAnimation
 .vscode
 .vs
 *.VC.db

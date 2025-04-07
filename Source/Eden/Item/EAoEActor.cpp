@@ -48,7 +48,7 @@ void AEAoEActor::BeginPlay()
 		SphereRadius,
 		16,
 		FColor::Green,
-		true,       // false: 일정 시간 후 사라짐
+		false,       // false: 일정 시간 후 사라짐
 		LifeTime,    // 이 AoEActor가 사라질 때까지 표시
 		0,
 		2.0f         // 선 두께

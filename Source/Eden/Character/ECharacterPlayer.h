@@ -82,6 +82,20 @@ protected:
 
 	void Attack();
 
+	// 무기 섹션
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* BothHand_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* OneHandL_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* OneHandR_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UStaticMeshComponent* Bow_WeaponMesh;
+
 // 무기스왑 애니메이션
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
@@ -111,7 +125,7 @@ protected:
 	void PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
 	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	// 인벤토리 섹션
+// 인벤토리 섹션
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	TObjectPtr<class UEInventoryComponent> InventoryComponent;
@@ -125,8 +139,8 @@ public:
 	bool bInventoryOpen = false;
 
 	void ToggleInventoryUI();
-
-	// 활 섹션
+	
+// 활 섹션
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
 	TSubclassOf<UECrosshairWidget> CrosshairWidgetClass;
 
@@ -146,19 +160,26 @@ public:
 
 	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
 
-	// 스킬 섹션
+// 스킬 섹션
 protected:
+	bool bCanUseSkill = true;
+	FTimerHandle SkillCooldownTimerHandle;
+	
+	void ResetSkillCooldown();
 	void ExecuteSkill();
-	void BothHandedSkill();
-	void OneHandedSkill();
 	void BowSkill();
 
-	// 경험치 섹션
+// 경험치 섹션
 protected:
 	UFUNCTION()
 	void ExpGain(int32 InExp);
 	
-	// UI 섹션
+// UI 섹션
 protected:
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
+	
+	void UpdateHudSkillImg();
+
+	UPROPERTY()
+	UEHUDWidget* HUDWidget;
 };

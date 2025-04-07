@@ -19,6 +19,8 @@ AECharacterBoss::AECharacterBoss()
 	AIControllerClass = AEBossAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_ENPCCAPSULE);
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BossMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Eden/Characters/Warrok_W_Kurniawan.Warrok_W_Kurniawan'"));
 	if (BossMeshRef.Object)
 	{
@@ -196,7 +198,6 @@ void AECharacterBoss::SetUpCharacterWidget(class UEUserWidget* InUserWidget)
 	{
 		HpBarWidget->BindStatComponent(Stat);
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
-		UE_LOG(LogTemp, Warning, TEXT("%f"), Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UEHpBarWidget::UpdateHpBar);
 	}
 }

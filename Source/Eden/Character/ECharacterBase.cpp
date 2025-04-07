@@ -23,7 +23,7 @@ AECharacterBase::AECharacterBase()
 
 	// Capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_ECAPSULE);
+	// GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_EPLAYERCAPSULE);
 
 	// Movement
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -127,7 +127,7 @@ void AECharacterBase::ComboActionBegin()
 	ComboActionMontage = CurrentWeaponData->AttackMontage;
 	
 	// 애니메이션 설정: 콤보 애니메이션 몽타주 재생
-	const float AttackSpeedRate = 1.2f;
+	const float AttackSpeedRate = CurrentWeaponData->AttackSpeed;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
 
@@ -172,7 +172,8 @@ void AECharacterBase::SetComboCheckTimer()
 	int32 ComboIndex = CurrentCombo - 1;
 	ensure(ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
 
-	const float AttackSpeedRate = 1.f;
+	// const float AttackSpeedRate = 1.f;
+	const float AttackSpeedRate = CurrentWeaponData->AttackSpeed;
 	// 유효 시간 계산: (프레임 수 / 프레임 레이트) / 공격 속도
 	float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
 	if (ComboEffectiveTime > 0.0f)
@@ -215,9 +216,12 @@ void AECharacterBase::AttackHitCheck()
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
 	// 공격 범위, 반경, 그리고 데미지 값을 정의합니다.
-	const float AttackRange = 40.f;
-	const float AttackRadius = 50.f;
-	const float AttackDamage = 50.f;
+	// const float AttackRange = 40.f;
+	// const float AttackRadius = 50.f;
+	// const float AttackDamage = 50.f
+	const float AttackRange = CurrentWeaponData->AttackRange;
+	const float AttackRadius = CurrentWeaponData->AttackRadius;
+	const float AttackDamage = CurrentWeaponData->BaseDamage;
 
 	// 공격 시작 지점: 캐릭터 위치에 콜리전 캡슐 반경만큼 전진한 위치
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
