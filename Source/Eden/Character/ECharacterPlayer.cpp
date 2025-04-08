@@ -25,6 +25,7 @@ AECharacterPlayer::AECharacterPlayer()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->SocketOffset = FVector(0.f, 50.f, 50.f);
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -182,7 +183,8 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Look);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Attack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AECharacterPlayer::TryBowChargeStart);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AECharacterPlayer::TryBowChargeEnd);
 
 	// 무기 교체
 	EnhancedInputComponent->BindAction(OneHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapOneHanded);
@@ -232,29 +234,38 @@ void AECharacterPlayer::Look(const FInputActionValue& Value)
 	}
 }
 
-void AECharacterPlayer::Attack()
+void AECharacterPlayer::TryBowChargeStart()
 {
-	FTimerHandle TransitionTimerHandle;
-	if (bIsBow)
+	if (bIsBow && bIsZoomedIn)
 	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (!bIsZoomedIn)
+		bIsAttackInput = true;
+		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
 		{
-			if (AnimInstance)
-			{
-				AnimInstance->Montage_Play(BowData->AttackMontage);
-				GetWorld()->GetTimerManager().SetTimer(TransitionTimerHandle, this, &AECharacterPlayer::AutoTransitionToShoot, 1.4f, false);
-			}	
-		}
-		else
-		{
-			AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
+			AnimInstance->bIsAttackInput = true;
 		}
 	}
 	else
 	{
-		ProcessComboCommand();	
+		Attack();
 	}
+}
+
+void AECharacterPlayer::TryBowChargeEnd()
+{
+	if (bIsBow && bIsZoomedIn)
+	{
+		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
+		{
+			AnimInstance->bIsAttackInput = false;
+			UE_LOG(LogTemp, Warning, TEXT("Bow charge end"));
+		}
+		bIsAttackInput = false;
+	}
+}
+
+void AECharacterPlayer::Attack()
+{
+	ProcessComboCommand();
 }
 
 void AECharacterPlayer::SwapOneHanded()
@@ -263,15 +274,11 @@ void AECharacterPlayer::SwapOneHanded()
 	{
 		AnimInstance->CurrentWeaponType = EWeaponType::OneHanded;
 		AnimInstance->bIsZoomedIn = false;
+		AnimInstance->bIsBow = false;
 	}
 	
 	bIsBow = false;
 	PlayWeaponSwapMontage(OneHandedData, WeaponSwapMontage_OneHanded);
-
-	if(CrosshairWidgetInstance)
-	{
-		CrosshairWidgetInstance->RemoveFromViewport();
-	}
 
 	OneHandL_WeaponMesh->SetVisibility(true);
 	OneHandR_WeaponMesh->SetVisibility(true);
@@ -285,25 +292,11 @@ void AECharacterPlayer::SwapBow()
 	{
 		AnimInstance->CurrentWeaponType = EWeaponType::Bow;
 		AnimInstance->bIsZoomedIn = false;
+		AnimInstance->bIsBow = true;
 	}
 	
 	bIsBow = true;
 	PlayWeaponSwapMontage(BowData, WeaponSwapMontage_Bow);
-
-	if(!CrosshairWidgetInstance && CrosshairWidgetClass)
-	{
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		if(PC)
-		{
-			CrosshairWidgetInstance = CreateWidget<UECrosshairWidget>(PC,CrosshairWidgetClass);
-		}
-	}
-
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if(CrosshairWidgetInstance)
-	{
-		CrosshairWidgetInstance->AddToViewport();
-	}
 
 	OneHandL_WeaponMesh->SetVisibility(false);
 	OneHandR_WeaponMesh->SetVisibility(false);
@@ -317,15 +310,11 @@ void AECharacterPlayer::SwapBothHanded()
 	{
 		AnimInstance->CurrentWeaponType = EWeaponType::BothHanded;
 		AnimInstance->bIsZoomedIn = false;
+		AnimInstance->bIsBow = false;
 	}
 	
 	bIsBow = false;
 	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
-
-	if(CrosshairWidgetInstance)
-	{
-		CrosshairWidgetInstance->RemoveFromViewport();
-	}
 	
 	OneHandL_WeaponMesh->SetVisibility(false);
 	OneHandR_WeaponMesh->SetVisibility(false);
@@ -447,46 +436,26 @@ void AECharacterPlayer::ShootArrow()
 	}
 }
 
-void AECharacterPlayer::LoopHold()
-{
-	if (bIsZoomedIn)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			AnimInstance->Montage_JumpToSection(FName("Hold"), BowData->AttackMontage);
-		}
-	}
-}
-
-void AECharacterPlayer::DrawAgain()
-{
-	if (bIsZoomedIn)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			// AnimInstance->Montage_JumpToSection(FName("DrawAgain"), BowData->AttackMontage);
-		}
-	}
-}
-
-void AECharacterPlayer::AutoTransitionToShoot()
-{
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance)
-	{
-		AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
-	}
-}
-
 void AECharacterPlayer::BowZoomIn()
 {
 	if(bIsBow){
 		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
 		{
 			AnimInstance->bIsZoomedIn = true;
-			// AnimInstance->Montage_Play(BowData->AttackMontage);
+		}
+
+		if(!CrosshairWidgetInstance && CrosshairWidgetClass)
+		{
+			APlayerController* PC = Cast<APlayerController>(GetController());
+			if(PC)
+			{
+				CrosshairWidgetInstance = CreateWidget<UECrosshairWidget>(PC,CrosshairWidgetClass);
+			}
+		}
+		
+		if(CrosshairWidgetInstance)
+		{
+			CrosshairWidgetInstance->AddToViewport();
 		}
 		
 		if (GetCharacterMovement())
@@ -502,7 +471,6 @@ void AECharacterPlayer::BowZoomIn()
 		}
 		
 		bIsZoomedIn = true;
-		AttackSpeedChange(CurrentWeaponData,1);
 	}
 }
 
@@ -512,9 +480,13 @@ void AECharacterPlayer::BowZoomOut()
 	{
 		AnimInstance->bIsZoomedIn = false;
 	}
+
+	if(CrosshairWidgetInstance)
+	{
+		CrosshairWidgetInstance->RemoveFromViewport();
+	}
 	
 	bIsZoomedIn = false;
-	AttackSpeedChange(CurrentWeaponData,1000);
 
 	if (GetCharacterMovement())
 	{
@@ -522,10 +494,6 @@ void AECharacterPlayer::BowZoomOut()
 	}
 	
 	FollowCamera -> SetFieldOfView(90.f);
-}
-
-void AECharacterPlayer::AttackSpeedChange(UEWeaponDataAsset* WeaponData, float AttackSpeed){
-	WeaponData->AttackSpeed = AttackSpeed;
 }
 
 void AECharacterPlayer::ResetSkillCooldown()

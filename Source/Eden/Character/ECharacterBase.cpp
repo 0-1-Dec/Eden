@@ -6,11 +6,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "EComboActionData.h"
+#include "Animation/EAnimInstance.h"
 #include "Physics/ECollision.h"
 #include "Engine/DamageEvents.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Item/EArrow.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/DamageFloatingText.h"
 
 // Sets default values
@@ -23,7 +23,6 @@ AECharacterBase::AECharacterBase()
 
 	// Capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-	// GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_EPLAYERCAPSULE);
 
 	// Movement
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -49,12 +48,6 @@ AECharacterBase::AECharacterBase()
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UEComboActionData> ComboActionDataRef(TEXT("/Script/Eden.EComboActionData'/Game/Eden/ChracterAction/EA_ComboAttack.EA_ComboAttack'"));
-	if (ComboActionDataRef.Object)
-	{
-		ComboActionData = ComboActionDataRef.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/Eden/Animation/Default/AM_Dead.AM_Dead'"));
@@ -120,15 +113,19 @@ void AECharacterBase::ComboActionBegin()
 {
 	// 콤보 상태 초기화
 	CurrentCombo = 1;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
 
-	// 이동 중지: 콤보 실행 중에는 캐릭터가 움직이지 않도록 설정
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	if (!AnimInstance->bIsBow)
+	{
+		// 이동 중지: 콤보 실행 중에는 캐릭터가 움직이지 않도록 설정
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	}
 
 	ComboActionMontage = CurrentWeaponData->AttackMontage;
 	
 	// 애니메이션 설정: 콤보 애니메이션 몽타주 재생
 	const float AttackSpeedRate = CurrentWeaponData->AttackSpeed;
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	
 	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
 
 	// 몽타주 종료 델리게이트 설정: 콤보 종료 시 호출될 함수 바인딩
@@ -170,12 +167,11 @@ void AECharacterBase::SetComboCheckTimer()
 {
 	// 현재 콤보 인덱스 계산 (0부터 시작)
 	int32 ComboIndex = CurrentCombo - 1;
-	ensure(ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
-
-	// const float AttackSpeedRate = 1.f;
+	ensure(CurrentWeaponData->ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
+	
 	const float AttackSpeedRate = CurrentWeaponData->AttackSpeed;
 	// 유효 시간 계산: (프레임 수 / 프레임 레이트) / 공격 속도
-	float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
+	float ComboEffectiveTime = (CurrentWeaponData->ComboActionData->EffectiveFrameCount[ComboIndex] / CurrentWeaponData->ComboActionData->FrameRate) / AttackSpeedRate;
 	if (ComboEffectiveTime > 0.0f)
 	{
 		// 설정한 시간 후 ComboCheck() 함수가 호출되도록 타이머를 시작합니다.
@@ -194,9 +190,9 @@ void AECharacterBase::ComboCheck()
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 		// 현재 콤보 카운트를 1 증가시키며 최대 콤보 제한을 넘지 않도록 합니다.
-		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, CurrentWeaponData->ComboActionData->MaxComboCount);
 		// 다음 콤보 애니메이션 섹션 이름 생성 (예: Section1, Section2, ...)
-		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
+		FName NextSection = *FString::Printf(TEXT("%s%d"), *CurrentWeaponData->ComboActionData->MontageSectionNamePrefix, CurrentCombo);
 		// 몽타주 내에서 다음 섹션으로 점프하여 애니메이션을 전환합니다.
 		AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
 		// 추가 콤보 입력 확인을 위한 타이머 재설정
@@ -216,9 +212,6 @@ void AECharacterBase::AttackHitCheck()
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
 	// 공격 범위, 반경, 그리고 데미지 값을 정의합니다.
-	// const float AttackRange = 40.f;
-	// const float AttackRadius = 50.f;
-	// const float AttackDamage = 50.f
 	const float AttackRange = CurrentWeaponData->AttackRange;
 	const float AttackRadius = CurrentWeaponData->AttackRadius;
 	const float AttackDamage = CurrentWeaponData->BaseDamage;

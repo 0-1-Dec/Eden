@@ -10,7 +10,6 @@
 #include "Interface/ECharacterHUDInterface.h"
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
-#include "UI/EHUDWidget.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
@@ -80,6 +79,8 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 
+	void TryBowChargeStart();
+	void TryBowChargeEnd();
 	void Attack();
 
 	// 무기 섹션
@@ -146,19 +147,14 @@ public:
 
 	UPROPERTY()
 	UECrosshairWidget* CrosshairWidgetInstance;
-	
-	bool bIsZoomedIn = false;
 
 	virtual void ShootArrow() override;
-	virtual void LoopHold() override;
-	virtual void DrawAgain() override;
-
-	void AutoTransitionToShoot();
 
 	void BowZoomIn();
 	void BowZoomOut();
 
-	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
+	bool bIsAttackInput = false;
+	bool bIsZoomedIn = false;
 
 // 스킬 섹션
 protected:

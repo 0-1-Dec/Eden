@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/EComboActionData.h"
 #include "Engine/DataAsset.h"
 #include "Item/EWeaponType.h"
 #include "EWeaponDataAsset.generated.h"
@@ -30,6 +31,9 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
 	float AttackRadius;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
+	TObjectPtr<UEComboActionData> ComboActionData;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
 	UAnimMontage* AttackMontage;
