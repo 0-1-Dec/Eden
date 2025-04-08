@@ -4,10 +4,6 @@
 #include "UI/EInventorySlotWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Inventory/EInventoryDragDropOperation.h"
-
-#include <comdef.h>
-
-#include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Character/ECharacterPlayer.h"
 
 void UEInventorySlotWidget::NativeConstruct()

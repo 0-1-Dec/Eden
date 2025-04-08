@@ -12,6 +12,8 @@ UEAnimInstance::UEAnimInstance()
 
 	// JumpingThreshould: 캐릭터가 점프 중인지 판단할 Z축 속도 임계값 (예: 100.0 이상이면 점프로 간주)
 	JumpingThreshould = 100.0f;
+
+	CurrentWeaponType = EWeaponType::OneHanded;
 }
 
 // NativeInitializeAnimation: 애니메이션 인스턴스 초기화 시 호출되어 초기 설정을 수행합니다.
@@ -41,17 +43,25 @@ void UEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		Velocity = Movement->Velocity;
 		// 2D 평면상의 속도 크기를 계산하여 지면 이동 속도를 업데이트합니다.
 		GroundSpeed = Velocity.Size2D();
+		
 		// 지면 속도가 MovingThreshould보다 작으면 캐릭터를 정지(idle) 상태로 간주합니다.
 		bIsIdle = GroundSpeed < MovingThreshould;
+
+		if (Owner)
+		{
+			FRotator OwnerRotation = Owner->GetActorRotation();
+			FRotationMatrix RotationMatrix(OwnerRotation);
+
+			FVector ForwardDirection = RotationMatrix.GetUnitAxis(EAxis::X);
+			FVector RightDirection = RotationMatrix.GetUnitAxis(EAxis::Y);
+
+			ForwardBackward = FVector::DotProduct(Velocity, ForwardDirection);
+			LeftRight = FVector::DotProduct(Velocity, RightDirection);
+		}
+
 		// 캐릭터가 공중에 떠 있는지(낙하 중인지)를 판단합니다.
 		bIsFalling = Movement->IsFalling();
-		// 캐릭터가 점프 중인지 여부를 결정합니다.
 		// 점프 상태는 낙하 중이면서, Z축 속도가 JumpingThreshould보다 큰 경우로 판단합니다.
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
 	}
-}
-
-void UEAnimInstance::SetBow(bool bIsTrue)
-{
-	bIsBow = bIsTrue;
 }

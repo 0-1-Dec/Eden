@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/EComboActionData.h"
 #include "Engine/DataAsset.h"
+#include "Item/EWeaponType.h"
 #include "EWeaponDataAsset.generated.h"
 
 /**
@@ -16,7 +18,7 @@ class EDEN_API UEWeaponDataAsset : public UPrimaryDataAsset
 
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Weapon)
-	FText WeaponName;
+	EWeaponType Weapon;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
 	float BaseDamage;
@@ -28,5 +30,14 @@ public:
 	float AttackSpeed;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
+	float AttackRadius;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
+	TObjectPtr<UEComboActionData> ComboActionData;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
+	UAnimMontage* SkillMontage;
 };
