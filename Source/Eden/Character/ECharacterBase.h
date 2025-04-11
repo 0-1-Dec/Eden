@@ -8,7 +8,7 @@
 #include "GameData/EWeaponDataAsset.h"
 #include "ECharacterBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, UEWeaponDataAsset*, NewWeaponData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponDataChanged, EWeaponType, NewWeaponData);
 
 // AECharacterBase 클래스는 ACharacter를 상속받아 게임 캐릭터의 기본 동작을 구현하며,
 // IEAnimationAttackInterface를 구현하여 애니메이션 공격 관련 기능을 제공합니다.
@@ -25,19 +25,15 @@ public:
 
 public:
 	FOnWeaponDataChanged OnWeaponDataChanged;
-
-	// =========================================================================================
+	
 	// 무기 상태 관리
-	// =========================================================================================
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Weapon,meta=(AllowPrivateAccess="true"))
 	UEWeaponDataAsset* CurrentWeaponData;
 
 	void SetWeaponData(UEWeaponDataAsset* NewWeaponData);
-
-	// =========================================================================================
+	
 	// 콤보 애니메이션 섹션
-	// =========================================================================================
 protected:
 	// 블루프린트나 에디터에서 수정할 수 있으며, 콤보 액션에 사용되는 애니메이션 몽타주를 저장합니다.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
@@ -72,34 +68,25 @@ protected:
 
 	// 다음 콤보 명령이 입력되었는지 여부를 판단하는 플래그.
 	bool HasNextComboCommand = false;
-
-	// =========================================================================================
+	
 	// 공격 관리 함수
-	// =========================================================================================
 protected:
 	// 공격 판정 함수: 캐릭터의 공격이 상대에게 적중했는지 확인하는 기능을 수행합니다.
-	// IEAnimationAttackInterface 또는 ACharacter의 기본 함수를 오버라이드 합니다.
 	virtual void AttackHitCheck() override;
 
 	// 피해 처리 함수: 캐릭터가 피해를 입었을 때, 피해량 계산 및 처리를 수행합니다.
-	// EventInstigator: 공격을 발생시킨 컨트롤러
-	// DamageCauser: 피해를 입힌 액터
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void CloseAttackHitCheck() override;
-
-	// =========================================================================================
+	
 	// 활 관련 섹션
-	// =========================================================================================
 protected:
 	TSubclassOf<class AEArrow> ArrowBP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	bool bIsBow = false;
-
-	// =========================================================================================
+	
 	// Dead 애니메이션 섹션
-	// =========================================================================================
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> DeadMontage;
@@ -108,14 +95,10 @@ protected:
 	void PlayDeadAnimation();
 
 	float DeadEventDelayTime = 5.0f;
-
-	// =========================================================================================
+	
 	// 스탯 섹션
-	// =========================================================================================
 protected:
-	// Stat:
-	// 캐릭터의 스탯(예: 체력, 공격력 등)을 관리하는 컴포넌트로,
-	// 에디터에서 볼 수 있으나 블루프린트에서는 읽기 전용으로 설정되어 있습니다.
+	// 캐릭터의 스탯(예: 체력, 공격력 등)을 관리하는 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, Meta = (AllowPricateAccess = "true"))
 	TObjectPtr<class UECharacterStatComponent> Stat;
 

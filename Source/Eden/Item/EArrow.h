@@ -28,11 +28,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Collision)
 	class UBoxComponent* CollisionComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Particle)
+	TObjectPtr<class UParticleSystem> TempParticle;
+
 public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	void InitProjectile(float InDamage, float InSpeed);
+
+	UFUNCTION()
+	void OnTargetDestroyed();
 
 private:
 	float Damage = 50.f;

@@ -81,7 +81,7 @@ void AECharacterBase::SetWeaponData(UEWeaponDataAsset* NewWeaponData)
 	}
 
 	CurrentWeaponData = NewWeaponData;
-	OnWeaponDataChanged.Broadcast(NewWeaponData);
+	OnWeaponDataChanged.Broadcast(NewWeaponData->Weapon);
 }
 
 // ProcessComboCommand: 콤보 커맨드를 처리하는 함수입니다.
@@ -89,6 +89,11 @@ void AECharacterBase::SetWeaponData(UEWeaponDataAsset* NewWeaponData)
 // - 타이머가 유효하지 않으면 다음 콤보 명령이 없음을 설정하고, 유효하다면 추가 콤보 입력이 들어왔음을 표시합니다.
 void AECharacterBase::ProcessComboCommand()
 {
+	if (GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+	
 	if (CurrentCombo == 0)
 	{
 		ComboActionBegin();

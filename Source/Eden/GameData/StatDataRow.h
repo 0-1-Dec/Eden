@@ -16,7 +16,7 @@ public:
     int32 Level;
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Level)
-    int32 ExpToNextLevel;
+    float ExpToNextLevel;
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
     int32 BaseAttack;

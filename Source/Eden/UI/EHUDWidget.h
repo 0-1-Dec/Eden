@@ -32,18 +32,42 @@ public:
 	void BindStatComponent(UECharacterStatComponent* InStatComp);
 
 	void UpdateHpBar(float NewCurrentHp);
+	void UpdateExp(float NewExp);
 
+	UFUNCTION()
 	void UpdateSkillIcon(EWeaponType CurrentWeapon);
 
 	void ResetCooldown();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsCooldownActive = false;
-	
+
+// Hp 섹션
 protected:
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HpProgressBar;
 
+	UPROPERTY()
+	float CurrentHp;
+
+	UPROPERTY()
+	float MaxHp;
+
+// Exp 섹션
+	UPROPERTY()
+	TObjectPtr<class UProgressBar> ExpProgressBar;
+
+	UPROPERTY()
+	float CurrentExp;
+
+	UPROPERTY()
+	float ExpToNextLevel;
+
+	UPROPERTY()
+	float CurrentLevel;
+
+// 스킬 섹션
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkillIcon)
 	UTexture2D* BowSkillIcon;
 
@@ -58,12 +82,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UImage> SkillCoolDownImg;
-
-	UPROPERTY()
-	float CurrentHp;
-
-	UPROPERTY()
-	float MaxHp;
 
 	UPROPERTY()
 	float CoolDown = 5.0f;

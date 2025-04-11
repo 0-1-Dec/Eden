@@ -131,6 +131,49 @@ void UEInventoryWidget::RefreshInventory()
     }
 }
 
+FReply UEInventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton && HeaderBox && HeaderBox->IsHovered())
+    {
+        bDragging = true;
+        const FVector2D ScreenPos = InMouseEvent.GetScreenSpacePosition();
+        const FVector2D WidgetPos = GetCachedGeometry().GetAbsolutePosition();
+        DragOffset = ScreenPos - WidgetPos;
+
+        if (TSharedPtr<SWidget> CachedWidget = GetCachedWidget())
+        {
+            // ToSharedRef()로 변환
+            return FReply::Handled().CaptureMouse(CachedWidget.ToSharedRef());
+        }
+    }
+    return Super::NativeOnMouseButtonDown(InGeometry,InMouseEvent);
+}
+
+FReply UEInventoryWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    if (bDragging && InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        bDragging = false;
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    return Super::NativeOnMouseButtonUp(InGeometry,InMouseEvent);
+}
+
+FReply UEInventoryWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    if (bDragging)
+    {
+        const FVector2D ScreenPos = InMouseEvent.GetScreenSpacePosition();
+        const FVector2D NewPos = ScreenPos - DragOffset;
+
+        // DPI 보정 없이 그대로 이동하고 싶으면 두 번째 인자를 true 로
+        SetPositionInViewport(NewPos, true); 
+        
+        return FReply::Handled();
+    }
+    return Super::NativeOnMouseMove(InGeometry,InMouseEvent);
+}
+
 void UEInventoryWidget::HandleInventoryChanged()
 {
     RefreshInventory();

@@ -8,6 +8,8 @@
 UEHUDWidget::UEHUDWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	MaxHp = -1;
+	CurrentLevel = 1;
+	ExpToNextLevel = -1;
 }
 
 void UEHUDWidget::NativeConstruct()
@@ -16,6 +18,9 @@ void UEHUDWidget::NativeConstruct()
 
 	HpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpVerticalBar")));
 	ensure(HpProgressBar);
+
+	ExpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("ExpVerticalBar")));
+	ensure(ExpProgressBar);
 
 	SkillImg = Cast<UImage>(GetWidgetFromName(TEXT("SkillIcon")));
 	ensure(SkillImg);
@@ -63,7 +68,6 @@ void UEHUDWidget::BindStatComponent(UECharacterStatComponent* InStatComp)
 	{
 		CurrentStatComp = InStatComp;
 	}
-	
 }
 
 void UEHUDWidget::UpdateHpBar(float NewCurrentHp)
@@ -74,6 +78,17 @@ void UEHUDWidget::UpdateHpBar(float NewCurrentHp)
 	if (HpProgressBar)
 	{
 		HpProgressBar->SetPercent(CurrentHp / MaxHp);
+	}
+}
+
+void UEHUDWidget::UpdateExp(float NewExp)
+{
+	CurrentExp = NewExp;
+	ExpToNextLevel = CurrentStatComp->GetStatRow(CurrentLevel)->ExpToNextLevel;
+
+	if (ExpProgressBar)
+	{
+		ExpProgressBar->SetPercent(CurrentExp / ExpToNextLevel);
 	}
 }
 

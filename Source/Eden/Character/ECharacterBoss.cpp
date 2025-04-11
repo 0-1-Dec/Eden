@@ -39,7 +39,7 @@ AECharacterBoss::AECharacterBoss()
 		DeadMontage = BossDeadMontageRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UEWeaponDataAsset> BossWeaponDataRef(TEXT("/Script/Eden.WeaponDataAsset'/Game/Eden/GameData/WeaponData/DA_OneHanded1.DA_OneHanded1'"));
+	static ConstructorHelpers::FObjectFinder<UEWeaponDataAsset> BossWeaponDataRef(TEXT("/Script/Eden.WeaponDataAsset'/Game/Eden/GameData/WeaponData/DA_BossAttack.DA_BossAttack'"));
 	if (BossWeaponDataRef.Object)
 	{
 		BossWeapon = BossWeaponDataRef.Object;;

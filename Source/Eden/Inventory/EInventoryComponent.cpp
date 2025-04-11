@@ -112,6 +112,8 @@ bool UEInventoryComponent::RemoveItem(UEItemDataAsset* ItemData, int32 SlotIndex
 	{
 		Slots[SlotIndex].Quantity -= 1;
 
+		
+
 		if (Slots[SlotIndex].Quantity <= 0)
 		{
 			Slots[SlotIndex].ItemData = nullptr;
@@ -167,15 +169,15 @@ void UEInventoryComponent::SwapItems(int32 SourceSlotIndex, int32 TargetSlotInde
 	{
 		return;
 	}
-
+	
 	if (Slots[SourceSlotIndex].ItemData == Slots[TargetSlotIndex].ItemData)
 	{
 		int32 Increment = FMath::Abs(Slots[TargetSlotIndex].Quantity - Slots[SourceSlotIndex].Quantity);
 		if (Slots[TargetSlotIndex].ItemData->MaxStackSize < Slots[TargetSlotIndex].Quantity + Increment)
 		{
-			Increment = Slots[TargetSlotIndex].ItemData->MaxStackSize - Slots[TargetSlotIndex].Quantity;
-			Slots[TargetSlotIndex].Quantity = Slots[TargetSlotIndex].ItemData->MaxStackSize;
-			Slots[SourceSlotIndex].Quantity -= Increment;
+			FEInventorySlot Temp = Slots[TargetSlotIndex];
+			Slots[TargetSlotIndex].Quantity = Slots[SourceSlotIndex].Quantity;
+			Slots[SourceSlotIndex].Quantity = Temp.Quantity;
 		}
 		else
 		{
@@ -188,31 +190,13 @@ void UEInventoryComponent::SwapItems(int32 SourceSlotIndex, int32 TargetSlotInde
 			Slots[SourceSlotIndex].ItemData = nullptr;
 			Slots[SourceSlotIndex].Quantity = 0;
 		}
-
+		
 		OnInventoryChanged.Broadcast();
 		return;
-		
 	}
+	
 	FEInventorySlot Temp = Slots[SourceSlotIndex];
 	Slots[SourceSlotIndex] = Slots[TargetSlotIndex];
 	Slots[TargetSlotIndex] = Temp;
 	OnInventoryChanged.Broadcast();
 }
-
-void UEInventoryComponent::DebugPrintInventory()
-{
-	for (int32 i = 0; i < Slots.Num(); i++)
-	{
-		if (Slots[i].ItemData)
-		{
-			// ItemData->GetName()을 통해 아이템 이름을 가져올 수 있다고 가정합니다.
-			UE_LOG(LogTemp, Warning, TEXT("Slot %d: %s, Quantity: %d"), i, *Slots[i].ItemData->GetName(), Slots[i].Quantity);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Slot %d: Empty"), i);
-		}
-	}
-}
-
-

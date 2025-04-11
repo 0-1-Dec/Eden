@@ -72,20 +72,17 @@ void UECharacterStatComponent::HealUp(float Amount)
 	OnHpChanged.Broadcast(CurrentHp);
 }
 
-void UECharacterStatComponent::AddExp(int32 InExp)
+void UECharacterStatComponent::AddExp(float InExp)
 {
 	CurrentExp += InExp;
-
-	CheckLevelUp();
-}
-
-void UECharacterStatComponent::CheckLevelUp()
-{
+	
 	if (CurrentExp >= GetStatRow(CurrentLevel)->ExpToNextLevel)
 	{
 		CurrentExp -= GetStatRow(CurrentLevel)->ExpToNextLevel;
 		LevelUp();
 	}
+	
+	OnExpChanged.Broadcast(CurrentExp);
 }
 
 void UECharacterStatComponent::LevelUp()

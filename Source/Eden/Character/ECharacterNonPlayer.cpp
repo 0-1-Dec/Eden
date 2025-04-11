@@ -20,6 +20,12 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 
 	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_ENPCCAPSULE);
 
+	static ConstructorHelpers::FObjectFinder<UEWeaponDataAsset> OneDataAssetRef(TEXT("/Script/Eden.EWeaponDataAsset'/Game/Eden/GameData/WeaponData/DA_NPCAttack.DA_NPCAttack'"));
+	if (OneDataAssetRef.Object)
+	{
+		CurrentWeaponData = OneDataAssetRef.Object;	
+	}
+
 	HpBar = CreateDefaultSubobject<UEWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
 	HpBar->SetRelativeLocation(FVector(0, 0, 250.0f));
@@ -109,14 +115,12 @@ void AECharacterNonPlayer::NotifyComboActionEnd()
 	OnAttackFinished.ExecuteIfBound();
 }
 
-
 void AECharacterNonPlayer::HandleDrop()
 {
 	if(!DropData) return;
 
 	// 경험치 지급
-	AECharacterPlayer* Player = Cast<AECharacterPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(),0));
-	if(Player)
+	if(AECharacterPlayer* Player = Cast<AECharacterPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(),0)))
 	{
 		if(UECharacterStatComponent* StatComponent = Player->FindComponentByClass<UECharacterStatComponent>())
 		{
@@ -138,10 +142,10 @@ void AECharacterNonPlayer::HandleDrop()
 		FVector SpawnLoc = GetActorLocation();
 		FRotator SpawnRot = FRotator::ZeroRotator;
 
-		AEDroppedItem* DroppedItem = GetWorld()->SpawnActor<AEDroppedItem>(DroppedItemClass,SpawnLoc,SpawnRot);
-		if(DroppedItem)
+		for (int32 i = 0; i < Count; i++)
 		{
-			DroppedItem->Init(ItemAsset,Count);
+			AEDroppedItem* DroppedItem = GetWorld()->SpawnActor<AEDroppedItem>(DroppedItemClass,SpawnLoc,SpawnRot);
+			DroppedItem->Init(ItemAsset);
 		}
 	}
 }
