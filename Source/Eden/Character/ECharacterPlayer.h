@@ -11,6 +11,7 @@
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
 #include "UI/EHUDWidget.h"
+#include "UI/EStatPanelWidget.h"
 #include "ECharacterPlayer.generated.h"
 
 /**
@@ -76,6 +77,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SkillAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> OpenSettingAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -161,4 +165,27 @@ protected:
 	// UI 섹션
 protected:
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
+
+	//스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
+public:
+	void ToggleStatUI();
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
+	TSubclassOf<UEStatPanelWidget> StatPanelWidgetClass;
+
+	UPROPERTY()
+	UEStatPanelWidget* StatPanelWidgetInstance;
+
+	bool bStatPanelOpen = false;
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleSettingUI();
+
+	UPROPERTY(EditAnywhere,Category = UI)
+	TSubclassOf<UUserWidget> SettingUIClass;
+
+	UPROPERTY()
+	UUserWidget* SettingUIInstance;
+
+	bool bSettingUIOpen = false;
 };

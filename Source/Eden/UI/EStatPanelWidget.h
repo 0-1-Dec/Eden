@@ -18,28 +18,62 @@ class EDEN_API UEStatPanelWidget : public UUserWidget
 protected:
     virtual void BeginPlay();
 
-    UPROPERTY(meta = (BindWidget))
-    class UTextBlock* Attack;
-
-    int32 atk;
-
-    /*
-    UPROPERTY(meta = (BindWidget))
-    class UTextBlock* Defense;
-    */
+    virtual void NativeConstruct();
 
     UPROPERTY(meta = (BindWidget))
-    class UButton* AddAttackButton;
+    class UTextBlock* BonusMaxHPTxt;
 
-    UFUNCTION()
-    void OnAddAttackClicked();
+    UPROPERTY(meta = (BindWidget))
+    class UButton* AddMaxHPBtn;
 
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* BonusAttackTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* AddAttackBtn;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* BonusDefenseTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* AddDefenseBtn;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* BonusCriticalChanceTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* AddCriticalChanceBtn;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* BonusCriticalDamageTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UButton* AddCriticalDamageBtn;
+
+
+    UFUNCTION(BlueprintCallable)
+    void OnAddButtonClicked(UButton* ClickedBtn);
+
+    UFUNCTION(BlueprintCallable)
     void UpdateDisplay();
+
+    UFUNCTION(BlueprintCallable)
+    void HandleMaxHPClick() { OnAddButtonClicked(AddMaxHPBtn);}
+
+    UFUNCTION(BlueprintCallable)
+    void HandleAttackClick() { OnAddButtonClicked(AddAttackBtn);}
+
+    UFUNCTION(BlueprintCallable)
+    void HandleDefenseClick() {OnAddButtonClicked(AddDefenseBtn);}
+
+    UFUNCTION(BlueprintCallable)
+    void HandleCriticalChanceClick() {OnAddButtonClicked(AddCriticalChanceBtn);}
+
+    UFUNCTION(BlueprintCallable)
+    void HandleCriticalDamageClick() {OnAddButtonClicked(AddCriticalDamageBtn);}
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* RemainStatPoint;
-    
-    int32 sp;
 
 private:
     TWeakObjectPtr<UECharacterStatComponent> CurrentStatComp;

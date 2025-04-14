@@ -22,13 +22,17 @@ public:
     int32 BaseAttack;
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
-    int32 BaseDefence;
+    int32 BaseDefense;
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
     int32 BaseCriticalChance;
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
     int32 BaseCriticalDamage;
+
+    UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
+    int32 BaseMaxHP;
+
 
     UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Stat)
     int32 StatPoint;

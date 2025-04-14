@@ -7,46 +7,56 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 
-
 void UEStatPanelWidget::BeginPlay(){
 
 }
 
-void UEStatPanelWidget::BindStatComponent(UECharacterStatComponent* StatComp)
+void UEStatPanelWidget::NativeConstruct()
 {
-	// CurrentStatComp = StatComp;
-	//
-	// if(AddAttackButton)
-	// {
-	// 	AddAttackButton->OnClicked.AddDynamic(this,&UEStatPanelWidget::OnAddAttackClicked);
-	// }
-	//
-	// // 초기값 설정
-	// atk = 0;
-	// sp = StatComp ? StatComp->StatPoints : 0;
-	//
-	// UpdateDisplay();
+	Super::NativeConstruct();
+
+	UpdateDisplay();
 }
 
-void UEStatPanelWidget::OnAddAttackClicked()
+void UEStatPanelWidget::BindStatComponent(UECharacterStatComponent* StatComp)
 {
-	// if(!CurrentStatComp.IsValid()) return;
-	// if(sp <= 0) return;
-	//
-	// atk += 1;
-	// sp -= 1;
-	//
-	// UpdateDisplay();
+	CurrentStatComp = StatComp;
+	UpdateDisplay();
+}
+
+void UEStatPanelWidget::OnAddButtonClicked(UButton* ClickedBtn)
+{
+
+	if(!CurrentStatComp.IsValid()) return;
+
+	UE_LOG(LogTemp,Warning,TEXT("OnAddButtonClicked called"));
+
+	if(ClickedBtn)
+		UE_LOG(LogTemp,Warning,TEXT("Clicked button: %s"),*ClickedBtn->GetName());
+	if(AddAttackBtn)
+		UE_LOG(LogTemp,Warning,TEXT("AddAttackBtn: %s"),*AddAttackBtn->GetName());
+
+
+	if(CurrentStatComp->StatPoints <= 0) return;
+
+	if(ClickedBtn == AddMaxHPBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusMaxHP);
+	if(ClickedBtn == AddAttackBtn) {
+		UE_LOG(LogTemp,Warning,TEXT("Button Match: AddAttackBtn clicked!")); CurrentStatComp->AddBonusStat(ECharacterStatType::BonusAttack);
+	}
+	if(ClickedBtn == AddDefenseBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusDefense);
+	if(ClickedBtn == AddCriticalChanceBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalChance);
+	if(ClickedBtn == AddCriticalDamageBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalDamage);
+
+	CurrentStatComp->StatPoints--;
+	UpdateDisplay();
 }
 
 void UEStatPanelWidget::UpdateDisplay()
 {
-	// if(Attack)
-	// {
-	// 	Attack->SetText(FText::Format(FText::FromString(TEXT("+{0}")),FText::AsNumber(atk)));
-	// }
-	// if(RemainStatPoint)
-	// {
-	// 	RemainStatPoint->SetText(FText::AsNumber(sp));
-	// }
+	BonusMaxHPTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusMaxHP)));
+	BonusAttackTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusAttack)));
+	BonusDefenseTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusDefense)));
+	BonusCriticalChanceTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalChance)));
+	BonusCriticalDamageTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalDamage)));
+	RemainStatPoint->SetText(FText::AsNumber(CurrentStatComp->StatPoints));
 }

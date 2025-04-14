@@ -105,6 +105,12 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		SkillAction = InputSkillRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputOpenSettingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Setting.IA_Setting'"));
+	if(nullptr != InputOpenSettingRef.Object)
+	{
+		OpenSettingAction = InputOpenSettingRef.Object;
+	}
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -157,10 +163,13 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Completed,this,&AECharacterPlayer::BowZoomOut);
 
 	// 스탯
-	EnhancedInputComponent->BindAction(OpenStatAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleInventoryUI);
+	EnhancedInputComponent->BindAction(OpenStatAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleStatUI);
 
 	// 스킬
 	EnhancedInputComponent->BindAction(SkillAction,ETriggerEvent::Started,this,&AECharacterPlayer::ExecuteSkill);
+
+	// 세팅 메뉴
+	EnhancedInputComponent->BindAction(OpenSettingAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleSettingUI);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -473,3 +482,71 @@ void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
 	}
 }
 
+
+void AECharacterPlayer::ToggleStatUI()
+{
+	if(!StatPanelWidgetInstance && StatPanelWidgetClass)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if(PC)
+		{
+			StatPanelWidgetInstance = CreateWidget<UEStatPanelWidget>(PC,StatPanelWidgetClass);
+		}
+
+		StatPanelWidgetInstance->BindStatComponent(Stat.Get());
+	}
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(StatPanelWidgetInstance)
+	{
+		if(bStatPanelOpen)
+		{
+			StatPanelWidgetInstance->RemoveFromParent();
+			bStatPanelOpen = false;
+
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+		} else
+		{
+			StatPanelWidgetInstance->AddToViewport();
+			bStatPanelOpen = true;
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(StatPanelWidgetInstance->TakeWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+	}
+}
+
+void AECharacterPlayer::ToggleSettingUI(){
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(!PC) return;
+
+	if(!SettingUIInstance && SettingUIClass)
+	{
+		SettingUIInstance = CreateWidget<UUserWidget>(PC,SettingUIClass);
+	}
+
+	if(!SettingUIInstance) return;
+
+	if(bSettingUIOpen)
+	{
+		SettingUIInstance->RemoveFromParent();
+		bSettingUIOpen = false;
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	} else
+	{
+		SettingUIInstance->AddToViewport();
+		bSettingUIOpen = true;
+
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(SettingUIInstance->TakeWidget());
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+	}
+}
