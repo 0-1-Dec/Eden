@@ -75,7 +75,7 @@ void UECharacterStatComponent::HealUp(float Amount)
 void UECharacterStatComponent::AddExp(int32 InExp)
 {
 	CurrentExp += InExp;
-
+	
 	CheckLevelUp();
 }
 
@@ -91,7 +91,7 @@ void UECharacterStatComponent::CheckLevelUp()
 void UECharacterStatComponent::LevelUp()
 {
 	CurrentLevel += 1;
-
+	StatPoints += GetStatRow(CurrentLevel)->StatPoint;
 	UE_LOG(LogTemp,Warning,TEXT("LEVEL UP!!"));
 }
 

@@ -10,11 +10,10 @@
 #include "Animation/EAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterStat/ECharacterStatComponent.h"
-#include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Inventory/EInventoryComponent.h"
 #include "Item/EArrow.h"
-#include "Physics/ECollision.h"
 #include "UI/EEnemyHPBarWidget.h"
 #include "UI/EHUDWidget.h"
 
@@ -25,28 +24,12 @@ AECharacterPlayer::AECharacterPlayer()
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->SocketOffset = FVector(0.f, 50.f, 50.f);
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	GetCapsuleComponent()->SetCollisionProfileName(CPROFILE_EPLAYERCAPSULE);
-
-	OneHandL_WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("OneL_Weapon"));
-	OneHandR_WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("OneR_Weapon"));
-	OneHandL_WeaponMesh->SetupAttachment(GetMesh(), FName("Hand_lSocket"));
-	OneHandR_WeaponMesh->SetupAttachment(GetMesh(), FName("Hand_rSocket"));
-	OneHandL_WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	OneHandR_WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	BothHand_WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Both_Weapon"));
-	BothHand_WeaponMesh->SetupAttachment(GetMesh(), FName("Hand_rSocket"));
-	BothHand_WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	Bow_WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bow_Weapon"));
-	Bow_WeaponMesh->SetupAttachment(GetMesh(), FName("Hand_lSocket"));
-	Bow_WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	float DefaultFOV = FollowCamera -> FieldOfView;
 
 	InventoryComponent = CreateDefaultSubobject<UEInventoryComponent>(TEXT("InventoryComponent"));
 
@@ -123,29 +106,11 @@ AECharacterPlayer::AECharacterPlayer()
 		SkillAction = InputSkillRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> OneHand_WeaponMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PostApocalypticMeleeWeapons/Meshes/SK_ShivGlass.SK_ShivGlass'"));
-	if (OneHand_WeaponMeshRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputOpenSettingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Setting.IA_Setting'"));
+	if(nullptr != InputOpenSettingRef.Object)
 	{
-		OneHandL_WeaponMesh->SetSkeletalMesh(OneHand_WeaponMeshRef.Object);
-		OneHandR_WeaponMesh->SetSkeletalMesh(OneHand_WeaponMeshRef.Object);
+		OpenSettingAction = InputOpenSettingRef.Object;
 	}
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Bow_WeaponMeshRef(TEXT("/Script/Engine.StaticMesh'/Game/Eden/Item/bow.bow'"));
-	if (Bow_WeaponMeshRef.Object)
-	{
-		Bow_WeaponMesh->SetStaticMesh(Bow_WeaponMeshRef.Object);
-	}
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BothHand_WeaponMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PostApocalypticMeleeWeapons/Meshes/SK_Rebar_Sledgehammer.SK_Rebar_Sledgehammer'"));
-	if (BothHand_WeaponMeshRef.Object)
-	{
-		BothHand_WeaponMesh->SetSkeletalMesh(BothHand_WeaponMeshRef.Object);
-	}
-
-	OneHandL_WeaponMesh->SetVisibility(true);
-	OneHandR_WeaponMesh->SetVisibility(true);
-	Bow_WeaponMesh->SetVisibility(false);
-	BothHand_WeaponMesh->SetVisibility(false);
 }
 
 void AECharacterPlayer::BeginPlay()
@@ -183,8 +148,7 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Look);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AECharacterPlayer::TryBowChargeStart);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AECharacterPlayer::TryBowChargeEnd);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Attack);
 
 	// 무기 교체
 	EnhancedInputComponent->BindAction(OneHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapOneHanded);
@@ -199,10 +163,13 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(BowZoomAction,ETriggerEvent::Completed,this,&AECharacterPlayer::BowZoomOut);
 
 	// 스탯
-	EnhancedInputComponent->BindAction(OpenStatAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleInventoryUI);
+	EnhancedInputComponent->BindAction(OpenStatAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleStatUI);
 
 	// 스킬
 	EnhancedInputComponent->BindAction(SkillAction,ETriggerEvent::Started,this,&AECharacterPlayer::ExecuteSkill);
+
+	// 세팅 메뉴
+	EnhancedInputComponent->BindAction(OpenSettingAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleSettingUI);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -234,92 +201,55 @@ void AECharacterPlayer::Look(const FInputActionValue& Value)
 	}
 }
 
-void AECharacterPlayer::TryBowChargeStart()
+void AECharacterPlayer::Attack()
 {
-	if (bIsBow && bIsZoomedIn)
+	FTimerHandle TransitionTimerHandle;
+	if (bIsBow)
 	{
-		bIsAttackInput = true;
-		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (!bIsZoomedIn)
 		{
-			AnimInstance->bIsAttackInput = true;
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(BowData->AttackMontage);
+				GetWorld()->GetTimerManager().SetTimer(TransitionTimerHandle, this, &AECharacterPlayer::AutoTransitionToShoot, 1.4f, false);
+			}	
+		}
+		else
+		{
+			AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
 		}
 	}
 	else
 	{
-		Attack();
+		ProcessComboCommand();	
 	}
-}
-
-void AECharacterPlayer::TryBowChargeEnd()
-{
-	if (bIsBow && bIsZoomedIn)
-	{
-		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-		{
-			AnimInstance->bIsAttackInput = false;
-			UE_LOG(LogTemp, Warning, TEXT("Bow charge end"));
-		}
-		bIsAttackInput = false;
-	}
-}
-
-void AECharacterPlayer::Attack()
-{
-	ProcessComboCommand();
+	
+	// ProcessComboCommand();
 }
 
 void AECharacterPlayer::SwapOneHanded()
 {
-	if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->CurrentWeaponType = EWeaponType::OneHanded;
-		AnimInstance->bIsZoomedIn = false;
-		AnimInstance->bIsBow = false;
-	}
-	
 	bIsBow = false;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(OneHandedData, WeaponSwapMontage_OneHanded);
-
-	OneHandL_WeaponMesh->SetVisibility(true);
-	OneHandR_WeaponMesh->SetVisibility(true);
-	Bow_WeaponMesh->SetVisibility(false);
-	BothHand_WeaponMesh->SetVisibility(false);
 }
 
 void AECharacterPlayer::SwapBow()
 {
-	if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->CurrentWeaponType = EWeaponType::Bow;
-		AnimInstance->bIsZoomedIn = false;
-		AnimInstance->bIsBow = true;
-	}
-	
 	bIsBow = true;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(BowData, WeaponSwapMontage_Bow);
-
-	OneHandL_WeaponMesh->SetVisibility(false);
-	OneHandR_WeaponMesh->SetVisibility(false);
-	Bow_WeaponMesh->SetVisibility(true);
-	BothHand_WeaponMesh->SetVisibility(false);
 }
 
 void AECharacterPlayer::SwapBothHanded()
 {
-	if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->CurrentWeaponType = EWeaponType::BothHanded;
-		AnimInstance->bIsZoomedIn = false;
-		AnimInstance->bIsBow = false;
-	}
-	
 	bIsBow = false;
+	UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetBow(bIsBow);
 	PlayWeaponSwapMontage(BothHandedData, WeaponSwapMontage_BothHanded);
-	
-	OneHandL_WeaponMesh->SetVisibility(false);
-	OneHandR_WeaponMesh->SetVisibility(false);
-	Bow_WeaponMesh->SetVisibility(false);
-	BothHand_WeaponMesh->SetVisibility(true);
 }
 
 void AECharacterPlayer::PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, UAnimMontage* Montage)
@@ -334,9 +264,8 @@ void AECharacterPlayer::PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, 
 		CurrentWeaponData = NewWeaponData;
 		SetWeaponData(NewWeaponData);
 		UE_LOG(LogTemp, Warning, TEXT("Changed Weapon %s"), *NewWeaponData->GetName());
+		return;
 	}
-
-	UpdateHudSkillImg();
 
 	/*PendingWeaponData = NewWeaponData;
 
@@ -397,53 +326,57 @@ void AECharacterPlayer::ToggleInventoryUI()
 
 void AECharacterPlayer::ShootArrow()
 {
-	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket_0")) + GetActorForwardVector();
-	FRotator MuzzleRotation;
-	
-	FVector CameraLocation;
-	FRotator CameraRotation;
-	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
-
-	FVector TraceStart = CameraLocation;
-	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * 10000.f);
-
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params);
-
-	FVector TargetPoint = bHit ? Hit.ImpactPoint : TraceEnd;
-
-	FVector ArrowDirection = (TargetPoint - MuzzleLocation).GetSafeNormal();
-	MuzzleRotation = ArrowDirection.Rotation();
-	
+	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Hand_lSocket")) + GetActorForwardVector();
+	FRotator MuzzleRotation = GetActorRotation();
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.Instigator = GetInstigator();
 
-	if (AEArrow* Projectile = GetWorld()->SpawnActor<AEArrow>(ArrowBP, MuzzleLocation, MuzzleRotation, SpawnParams))
+	AEArrow* Projectile = GetWorld()->SpawnActor<AEArrow>(ArrowBP, MuzzleLocation, MuzzleRotation, SpawnParams);
+
+	if (Projectile)
 	{
-		if (bIsZoomedIn)
+		Projectile->InitProjectile(200.f, 2000.f);
+	}
+}
+
+void AECharacterPlayer::LoopHold()
+{
+	if (bIsZoomedIn)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
 		{
-			Projectile->InitProjectile(200.f, 4000.f);	
+			AnimInstance->Montage_JumpToSection(FName("Hold"), BowData->AttackMontage);
 		}
-		else
+	}
+}
+
+void AECharacterPlayer::DrawAgain()
+{
+	if (bIsZoomedIn)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
 		{
-			Projectile->InitProjectile(200.f, 2000.f);
+			AnimInstance->Montage_JumpToSection(FName("DrawAgain"), BowData->AttackMontage);
 		}
+	}
+}
+
+void AECharacterPlayer::AutoTransitionToShoot()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_JumpToSection(FName("Shoot"), BowData->AttackMontage);
 	}
 }
 
 void AECharacterPlayer::BowZoomIn()
 {
 	if(bIsBow){
-		if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-		{
-			AnimInstance->bIsZoomedIn = true;
-		}
-
 		if(!CrosshairWidgetInstance && CrosshairWidgetClass)
 		{
 			APlayerController* PC = Cast<APlayerController>(GetController());
@@ -452,12 +385,19 @@ void AECharacterPlayer::BowZoomIn()
 				CrosshairWidgetInstance = CreateWidget<UECrosshairWidget>(PC,CrosshairWidgetClass);
 			}
 		}
-		
+
+		APlayerController* PC = Cast<APlayerController>(GetController());
 		if(CrosshairWidgetInstance)
 		{
 			CrosshairWidgetInstance->AddToViewport();
 		}
-		
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(BowData->AttackMontage);
+		}
+
 		if (GetCharacterMovement())
 		{
 			GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -471,22 +411,18 @@ void AECharacterPlayer::BowZoomIn()
 		}
 		
 		bIsZoomedIn = true;
+		AttackSpeedChange(CurrentWeaponData,1);
 	}
 }
 
-void AECharacterPlayer::BowZoomOut()
-{
-	if (UEAnimInstance* AnimInstance = Cast<UEAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->bIsZoomedIn = false;
-	}
+void AECharacterPlayer::BowZoomOut(){
+	bIsZoomedIn = false;
 
 	if(CrosshairWidgetInstance)
 	{
 		CrosshairWidgetInstance->RemoveFromViewport();
 	}
-	
-	bIsZoomedIn = false;
+	AttackSpeedChange(CurrentWeaponData,1000);
 
 	if (GetCharacterMovement())
 	{
@@ -496,36 +432,34 @@ void AECharacterPlayer::BowZoomOut()
 	FollowCamera -> SetFieldOfView(90.f);
 }
 
-void AECharacterPlayer::ResetSkillCooldown()
-{
-	bCanUseSkill = true;
-	HUDWidget->ResetCooldown();
+void AECharacterPlayer::AttackSpeedChange(UEWeaponDataAsset* WeaponData, float AttackSpeed){
+	WeaponData->AttackSpeed = AttackSpeed;
 }
 
 void AECharacterPlayer::ExecuteSkill()
 {
-	if (!bCanUseSkill)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Skill on cooldown"));
-		return;
-	}
-	
 	if (CurrentWeaponData == BowData)
 	{
 		BowSkill();
 	}
+	else if (CurrentWeaponData == OneHandedData)
+	{
+		OneHandedSkill();
+	}
 	else
 	{
-		if (CurrentWeaponData->SkillMontage)
-		{
-			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			AnimInstance->Montage_Play(CurrentWeaponData->SkillMontage);	
-		}
+		BothHandedSkill();
 	}
-	
-	HUDWidget->bIsCooldownActive = true;
-	bCanUseSkill = false;
-	GetWorld()->GetTimerManager().SetTimer(SkillCooldownTimerHandle, this, &AECharacterPlayer::ResetSkillCooldown, 5.f, false);
+}
+
+void AECharacterPlayer::BothHandedSkill()
+{
+	UE_LOG(LogTemp, Display, TEXT("BothHandedSkill"));
+}
+
+void AECharacterPlayer::OneHandedSkill()
+{
+	UE_LOG(LogTemp, Display, TEXT("OneHandedSkill"));
 }
 
 void AECharacterPlayer::BowSkill()
@@ -542,19 +476,77 @@ void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
-		HUDWidget = InHUDWidget;
-		
 		InHUDWidget->BindStatComponent(Stat);
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateHpBar);
 	}
 }
 
-void AECharacterPlayer::UpdateHudSkillImg()
+
+void AECharacterPlayer::ToggleStatUI()
 {
-	if (HUDWidget)
+	if(!StatPanelWidgetInstance && StatPanelWidgetClass)
 	{
-		HUDWidget->UpdateSkillIcon(CurrentWeaponData->Weapon);
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if(PC)
+		{
+			StatPanelWidgetInstance = CreateWidget<UEStatPanelWidget>(PC,StatPanelWidgetClass);
+		}
+
+		StatPanelWidgetInstance->BindStatComponent(Stat.Get());
+	}
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(StatPanelWidgetInstance)
+	{
+		if(bStatPanelOpen)
+		{
+			StatPanelWidgetInstance->RemoveFromParent();
+			bStatPanelOpen = false;
+
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+		} else
+		{
+			StatPanelWidgetInstance->AddToViewport();
+			bStatPanelOpen = true;
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(StatPanelWidgetInstance->TakeWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
 	}
 }
 
+void AECharacterPlayer::ToggleSettingUI(){
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if(!PC) return;
+
+	if(!SettingUIInstance && SettingUIClass)
+	{
+		SettingUIInstance = CreateWidget<UUserWidget>(PC,SettingUIClass);
+	}
+
+	if(!SettingUIInstance) return;
+
+	if(bSettingUIOpen)
+	{
+		SettingUIInstance->RemoveFromParent();
+		bSettingUIOpen = false;
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	} else
+	{
+		SettingUIInstance->AddToViewport();
+		bSettingUIOpen = true;
+
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(SettingUIInstance->TakeWidget());
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+	}
+}
