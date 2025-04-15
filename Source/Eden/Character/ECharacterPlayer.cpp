@@ -10,7 +10,6 @@
 #include "Animation/EAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterStat/ECharacterStatComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/OverlapResult.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -21,7 +20,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Physics/ECollision.h"
-#include "UI/EEnemyHPBarWidget.h"
 #include "UI/EHUDWidget.h"
 
 AECharacterPlayer::AECharacterPlayer()
@@ -749,8 +747,6 @@ void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
-		HUDWidget = InHUDWidget;
-		
 		InHUDWidget->BindStatComponent(Stat);
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
 		InHUDWidget->UpdateExp(Stat->GetCurrentExp());

@@ -203,9 +203,6 @@ protected:
 	
 // UI 섹션
 protected:
-	UPROPERTY()
-	UEHUDWidget* HUDWidget;
-	
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
 
 //스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
