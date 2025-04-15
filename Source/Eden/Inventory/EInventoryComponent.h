@@ -56,7 +56,4 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Inventory)
 	FOnInventoryChangedDelegate OnInventoryChanged;
-
-
-	void DebugPrintInventory();
 };

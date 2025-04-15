@@ -5,7 +5,6 @@
 
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/DamageFloatingText.h"
 
@@ -13,7 +12,7 @@
 AEArrow::AEArrow()
 {
 	CollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collision"));
-	Cast<UBoxComponent>(CollisionComponent)->SetBoxExtent(FVector(50,3,3));
+	Cast<UBoxComponent>(CollisionComponent)->SetBoxExtent(FVector(6,3,3));
 	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("EProjectile"));
 	SetRootComponent(CollisionComponent);
 
@@ -23,8 +22,8 @@ AEArrow::AEArrow()
 	ArrowMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
-	ProjectileMovementComponent->InitialSpeed = 4000.f;
-	ProjectileMovementComponent->MaxSpeed = 4000.f;
+	ProjectileMovementComponent->InitialSpeed = 5000.f;
+	ProjectileMovementComponent->MaxSpeed = 5000.f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.3f;
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 
@@ -40,6 +39,12 @@ AEArrow::AEArrow()
 void AEArrow::BeginPlay()
 {
 	Super::BeginPlay();
+	SetLifeSpan(15.0f);
+}
+
+void AEArrow::OnTargetDestroyed()
+{
+	Destroy();
 }
 
 void AEArrow::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -47,9 +52,9 @@ void AEArrow::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	if (OtherActor && OtherComp && OtherActor != GetOwner())
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherActor->GetName());
 		FVector SpawnLoc = Hit.GetActor()->GetActorLocation() + FVector(0,0,100);
 		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(Damage);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TempParticle, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 		
 		Destroy();
 	}

@@ -51,8 +51,7 @@ void AEDroppedItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* O
 	}
 }
 
-void AEDroppedItem::Init(UEItemDataAsset* InItemData,int32 InCount)
+void AEDroppedItem::Init(UEItemDataAsset* InItemData)
 {
 	ItemData = InItemData;
-	StackCount = InCount;
 }

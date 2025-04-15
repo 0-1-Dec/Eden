@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "DrawDebugHelpers.h"
 #include "Character/ECharacterBoss.h"
+#include "UI/DamageFloatingText.h"
 
 // Sets default values
 AEAoEActor::AEAoEActor()
@@ -95,6 +96,7 @@ void AEAoEActor::ApplyContinuousDamage()
 	{
 		if (!IsValid(Pawn)) continue;
 		UGameplayStatics::ApplyDamage(Pawn, Damage, Pawn->GetController(), this, nullptr);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),Pawn->GetActorLocation() + FVector(0, 0, 100.f),FRotator::ZeroRotator)->Init(Damage);
 		Boss->HealUp(Damage * 10.f);
 	}
 }

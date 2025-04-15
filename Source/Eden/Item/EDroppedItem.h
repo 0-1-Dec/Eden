@@ -34,9 +34,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Item)
 	UEItemDataAsset* ItemData;
 
-	int32 StackCount = 1;
-
-	virtual void Init(UEItemDataAsset* InItemData,int32 InCount);
+	virtual void Init(UEItemDataAsset* InItemData);
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,AActor* OtherActor,

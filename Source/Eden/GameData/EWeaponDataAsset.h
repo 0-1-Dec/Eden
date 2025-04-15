@@ -40,4 +40,7 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
 	UAnimMontage* SkillMontage;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = WeaponStat)
+	UAnimMontage* EquipMontage;
 };

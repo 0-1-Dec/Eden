@@ -1,7 +1,5 @@
 // 프로젝트 설정의 Description 페이지에서 저작권 정보를 작성하세요.
 #include "Game/EGameMode.h"
-#include "EGameMode.h"
-#include "Player/EPlayerController.h"
 
 // AEGameMode 클래스의 생성자
 AEGameMode::AEGameMode()

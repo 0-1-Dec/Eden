@@ -8,6 +8,7 @@
 #include "GameData/EWeaponDataAsset.h"
 #include "Interface/EAnimationBowInterface.h"
 #include "Interface/ECharacterHUDInterface.h"
+#include "Item/EBothSkillVFXActor.h"
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
 #include "UI/EHUDWidget.h"
@@ -79,12 +80,35 @@ protected:
 	TObjectPtr<class UInputAction> SkillAction;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> DodgeAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> OpenSettingAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Dodge(const FInputActionValue& Value);
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* DodgeMontage;
+
+	void TryBowChargeStart();
+	void TryBowChargeEnd();
 	void Attack();
+
+	// 무기 섹션
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* BothHand_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* OneHandL_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USkeletalMeshComponent* OneHandR_WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UStaticMeshComponent* Bow_WeaponMesh;
 
 // 무기스왑 애니메이션
 protected:
@@ -96,26 +120,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	UEWeaponDataAsset* BothHandedData;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
-	UAnimMontage* WeaponSwapMontage_OneHanded;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
-	UAnimMontage* WeaponSwapMontage_Bow;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponAnimation)
-	UAnimMontage* WeaponSwapMontage_BothHanded;
-
+	
 	UEWeaponDataAsset* PendingWeaponData;
 
 	void SwapOneHanded();
 	void SwapBow();
 	void SwapBothHanded();
 
-	void PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData, UAnimMontage* Montage);
+	void PlayWeaponSwapMontage(UEWeaponDataAsset* NewWeaponData);
 	void OnWeaponSwapMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	// 인벤토리 섹션
+// 인벤토리 섹션
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Inventory)
 	TObjectPtr<class UEInventoryComponent> InventoryComponent;
@@ -129,44 +144,71 @@ public:
 	bool bInventoryOpen = false;
 
 	void ToggleInventoryUI();
-
-	// 활 섹션
+	
+// 활 섹션
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
 	TSubclassOf<UECrosshairWidget> CrosshairWidgetClass;
 
 	UPROPERTY()
 	UECrosshairWidget* CrosshairWidgetInstance;
-	
-	bool bIsZoomedIn = false;
 
 	virtual void ShootArrow() override;
-	virtual void LoopHold() override;
-	virtual void DrawAgain() override;
-
-	void AutoTransitionToShoot();
 
 	void BowZoomIn();
 	void BowZoomOut();
 
-	void AttackSpeedChange(UEWeaponDataAsset* NewWeaponData, float AttackSpeed);
+	bool bIsAttackInput = false;
+	bool bIsZoomedIn = false;
 
-	// 스킬 섹션
+// 스킬 섹션
 protected:
+	bool bCanUseSkill = true;
+	FTimerHandle SkillCooldownTimerHandle;
+	
 	void ExecuteSkill();
-	void BothHandedSkill();
-	void OneHandedSkill();
-	void BowSkill();
+	void SkillEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
+	void ResetSkillCooldown();
 
-	// 경험치 섹션
+	APawn* FindNearestPawnInAttackRange();
+	virtual void ShootHomingArrow(APawn* Nearest) override;
+
+// 양손 무기 스킬 섹션
+protected:
+	TArray<FVector> VFXSpawnLocations;
+	int32 VFXSpawnIndex = 0;
+	FTimerHandle VFXTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill)
+	UParticleSystem* SkillEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill)
+	UParticleSystem* LastSkillEffect;
+	
+	virtual void ExecuteBothSkill() override;
+	void SpawnNextVFX();
+	void SpawnSequentialVFX();
+	void SpawnLastVFX();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = VFX)
+	TSubclassOf<class AEBothSkillVFXActor> BothSkillVFXActor;
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Skill)
+	APawn* NearestTargetPawn = nullptr;
+
+// 경험치 섹션
 protected:
 	UFUNCTION()
-	void ExpGain(int32 InExp);
+	void ExpGain(float InExp);
 	
-	// UI 섹션
+// UI 섹션
 protected:
+	UPROPERTY()
+	UEHUDWidget* HUDWidget;
+	
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
 
-	//스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
+//스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
 public:
 	void ToggleStatUI();
 

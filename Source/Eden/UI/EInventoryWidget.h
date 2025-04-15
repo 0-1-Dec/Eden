@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "EInventorySlotWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/SizeBox.h"
 #include "Inventory/EInventoryComponent.h"
 #include "Components/UniformGridPanel.h"
 #include "EInventoryWidget.generated.h"
@@ -36,7 +37,18 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void RefreshInventory();
-public:
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 	UFUNCTION()
 	void HandleInventoryChanged();
+	
+private:
+	UPROPERTY(meta=(BindWidget))
+	USizeBox* HeaderBox;
+
+	FVector2D DragOffset;
+	bool bDragging = false;
 };

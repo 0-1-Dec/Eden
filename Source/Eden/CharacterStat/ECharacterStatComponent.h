@@ -20,9 +20,8 @@ enum class ECharacterStatType: uint8
 
 // HP가 0이 되었을 때 발생하는 이벤트 델리게이트 선언
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExpGainDelegate, int32, InExp);
-
-// HP가 변경될 때 호출되며, 변경된 HP 값을 전달하는 이벤트 델리게이트 선언
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpGainDelegate, float /*InExp*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpChangedDelegate, float /*InExp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate,float /*NewHp*/);
 
 // UECharacterStatComponent 클래스는 캐릭터의 스탯(예: HP, 공격 사거리 등)을 관리하는 컴포넌트입니다.
@@ -49,6 +48,8 @@ public:
 	FOnHpChangedDelegate OnHpChanged;
 
 	FOnExpGainDelegate OnExpGain;
+
+	FOnExpChangedDelegate OnExpChanged;
 
 	// 인라인 함수: 현재 HP 값을 반환합니다.
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
@@ -77,7 +78,7 @@ protected:
 	int32 CurrentLevel = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
-	int32 CurrentExp = 0;
+	float CurrentExp = 0;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
@@ -187,11 +188,9 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddExp(int32 InExp);
+	void AddExp(float InExp);
 
 protected:
-	void CheckLevelUp();
-
 	void LevelUp();
 
 public:
