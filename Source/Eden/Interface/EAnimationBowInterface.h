@@ -23,8 +23,4 @@ class EDEN_API IEAnimationBowInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void ShootArrow() = 0;
-
-	virtual void LoopHold() = 0;
-
-	virtual void DrawAgain() = 0;
 };

@@ -43,12 +43,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
 
-	// ComboActionData:
-	// 콤보 공격과 관련된 데이터를 저장하는 객체로, 에디터에서 설정 가능하지만 블루프린트에서는 읽기 전용입니다.
-	// Meta 속성 AllowPrivateAccess는 내부 접근 권한을 허용합니다.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UEComboActionData> ComboActionData;
-
 	// 콤보 명령을 처리하는 함수: 플레이어의 입력에 따른 콤보 연계 처리를 수행합니다.
 	void ProcessComboCommand();
 
