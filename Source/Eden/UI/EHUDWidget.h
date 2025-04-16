@@ -32,7 +32,8 @@ public:
 	void BindStatComponent(UECharacterStatComponent* InStatComp);
 
 	void UpdateHpBar(float NewCurrentHp);
-	void UpdateExp(float NewExp);
+	void UpdateExpBar(float NewExp);
+	void UpdateLevel();
 
 	UFUNCTION()
 	void UpdateSkillIcon(EWeaponType CurrentWeapon);

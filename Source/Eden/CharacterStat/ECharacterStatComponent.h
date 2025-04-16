@@ -3,23 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ECharacterStatType.h"
 #include "Components/ActorComponent.h"
+#include "Game/CharacterStatSnapshot.h"
 #include "GameData/StatDataRow.h"
 #include "ECharacterStatComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class ECharacterStatType: uint8
-{
-	BonusMaxHP,
-	BonusAttack,
-	BonusDefense,
-	BonusCriticalChance,
-	BonusCriticalDamage,
-	// 필요시 더 추가할 것
-};
-
 // HP가 0이 되었을 때 발생하는 이벤트 델리게이트 선언
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
+DECLARE_MULTICAST_DELEGATE(FLevelChangedDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpGainDelegate, float /*InExp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpChangedDelegate, float /*InExp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate,float /*NewHp*/);
@@ -50,6 +42,8 @@ public:
 	FOnExpGainDelegate OnExpGain;
 
 	FOnExpChangedDelegate OnExpChanged;
+
+	FLevelChangedDelegate OnLevelChanged;
 
 	// 인라인 함수: 현재 HP 값을 반환합니다.
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
@@ -88,7 +82,7 @@ protected:
 	float BaseAttack = 20.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
-	float BaseDefense = 5.f;
+	float BaseDefence = 5.f;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
 	float BaseCriticalChance = 0.f;
@@ -103,7 +97,7 @@ protected:
 	float BonusAttack = 0.f;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Stat)
-	float BonusDefense = 0.f;
+	float BonusDefence = 0.f;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
 	float BonusCriticalChance = 0.f;
@@ -129,63 +123,18 @@ public:
 	FORCEINLINE float GetAttack() const {return BaseAttack + BonusAttack * 5;}
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetDefense() const {return BaseDefense + BonusDefense * 3;}
+	FORCEINLINE float GetDefense() const {return BonusDefence + BonusDefence * 3;}
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetCriticalChance() const {return BaseCriticalChance + BonusCriticalChance;}
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetCriticalDamage() const { return BaseCriticalDamage + BonusCriticalDamage * 10; }
-
-	UFUNCTION(BlueprintCallable)
-	float GetBonusStat(ECharacterStatType StatType) const
-	{
-		switch(StatType)
-		{
-		case ECharacterStatType::BonusMaxHP:
-			return BonusMaxHp;
-		case ECharacterStatType::BonusAttack:
-			return BonusAttack;
-		case ECharacterStatType::BonusDefense:
-			return BonusDefense;
-		case ECharacterStatType::BonusCriticalChance:
-			return BonusCriticalChance;
-		case ECharacterStatType::BonusCriticalDamage:
-			return BonusCriticalDamage;
-		default:
-			return 0.f;
-		}
-	}
-
-	UFUNCTION(BlueprintCallable)
-	void AddBonusStat(ECharacterStatType StatType)
-	{
-		switch(StatType)
-		{
-		case ECharacterStatType::BonusMaxHP:
-			BonusMaxHp++;
-			break;
-		case ECharacterStatType::BonusAttack:
-			BonusAttack++;
-			break;
-		case ECharacterStatType::BonusDefense:
-			BonusDefense++;
-			break;
-		case ECharacterStatType::BonusCriticalChance:
-			BonusCriticalChance++;
-			break;
-		case ECharacterStatType::BonusCriticalDamage:
-			BonusCriticalDamage++;
-			break;
-		}
-	}
-
-
-
-
+	
 	UFUNCTION(BlueprintCallable)
 	void HealUp(float Amount); 
 
+// 경험치 섹션
 public:
 	UFUNCTION(BlueprintCallable)
 	void AddExp(float InExp);
@@ -199,6 +148,21 @@ public:
 
 	const FStatDataRow* GetStatRow(int32 Level) const;
 
+// 스탯 섹션
 public:
 	int32 StatPoints = 3;
+
+	UFUNCTION(BlueprintCallable)
+	float GetBonusStat(ECharacterStatType StatType) const;
+	
+	UFUNCTION(BlueprintCallable)
+	void AddBonusStat(ECharacterStatType StatType);
+
+// stat snapshot 섹션
+public:
+	UFUNCTION(BlueprintCallable)
+	FCharacterStatSnapshot MakeStatSnapshot() const;
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyStatSnapshot(const FCharacterStatSnapshot& InSnapshot);
 };

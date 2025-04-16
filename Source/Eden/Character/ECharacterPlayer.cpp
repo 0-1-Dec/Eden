@@ -12,6 +12,7 @@
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/OverlapResult.h"
+#include "Game/EGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Inventory/EInventoryComponent.h"
@@ -166,6 +167,14 @@ void AECharacterPlayer::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	if (Stat && InventoryComponent)
+	{
+		if (UEGameInstance* GI = GetGameInstance<UEGameInstance>())
+		{
+			GI->ApplyToComponents(Stat, InventoryComponent);
+		}
 	}
 
 	Stat->OnExpGain.AddUObject(this, &AECharacterPlayer::ExpGain);
@@ -577,7 +586,7 @@ void AECharacterPlayer::SkillEnd(class UAnimMontage* TargetMontage, bool IsPrope
 		NearestTargetPawn = nullptr;
 	}
 	
-	HUDWidget->bIsCooldownActive = true;
+	HUDWidgetInstance->bIsCooldownActive = true;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	GetWorld()->GetTimerManager().SetTimer(SkillCooldownTimerHandle, this, &AECharacterPlayer::ResetSkillCooldown, 5.f, false);
 }
@@ -585,7 +594,7 @@ void AECharacterPlayer::SkillEnd(class UAnimMontage* TargetMontage, bool IsPrope
 void AECharacterPlayer::ResetSkillCooldown()
 {
 	bCanUseSkill = true;
-	HUDWidget->ResetCooldown();
+	HUDWidgetInstance->ResetCooldown();
 }
 
 APawn* AECharacterPlayer::FindNearestPawnInAttackRange()
@@ -747,11 +756,14 @@ void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
 {
 	if (InHUDWidget)
 	{
+		HUDWidgetInstance = InHUDWidget;
+		
 		InHUDWidget->BindStatComponent(Stat);
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
-		InHUDWidget->UpdateExp(Stat->GetCurrentExp());
+		InHUDWidget->UpdateExpBar(Stat->GetCurrentExp());
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateHpBar);
-		Stat->OnExpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateExp);
+		Stat->OnExpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateExpBar);
+		Stat->OnLevelChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateLevel);
 		OnWeaponDataChanged.AddDynamic(InHUDWidget, &UEHUDWidget::UpdateSkillIcon);
 	}
 }

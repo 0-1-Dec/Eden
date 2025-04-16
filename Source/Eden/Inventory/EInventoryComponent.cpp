@@ -23,10 +23,12 @@ void UEInventoryComponent::InitializeInventory(int32 InSlotCount)
 {
 	if (InSlotCount <= 0)
 	{
-		InSlotCount = 1;
+		InSlotCount = 25;
 	}
 	
 	Slots.SetNum(InSlotCount);
+	
+	OnInventoryChanged.Broadcast();
 }
 
 bool UEInventoryComponent::AddItem(UEItemDataAsset* ItemData, int32 Quantity)
@@ -198,5 +200,12 @@ void UEInventoryComponent::SwapItems(int32 SourceSlotIndex, int32 TargetSlotInde
 	FEInventorySlot Temp = Slots[SourceSlotIndex];
 	Slots[SourceSlotIndex] = Slots[TargetSlotIndex];
 	Slots[TargetSlotIndex] = Temp;
+	OnInventoryChanged.Broadcast();
+}
+
+void UEInventoryComponent::InitFromArray(const TArray<FEInventorySlot>& InSlots)
+{
+	Slots = InSlots;
+
 	OnInventoryChanged.Broadcast();
 }

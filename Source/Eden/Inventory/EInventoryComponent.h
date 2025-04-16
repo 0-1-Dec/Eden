@@ -56,4 +56,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Inventory)
 	FOnInventoryChangedDelegate OnInventoryChanged;
+
+// 스냅샷 섹션
+public:
+	UFUNCTION(BlueprintCallable)
+	const TArray<FEInventorySlot>& GetAllSlots() const { return Slots; }
+
+	UFUNCTION(BlueprintCallable)
+	void InitFromArray(const TArray<FEInventorySlot>& InSlots);
 };
