@@ -147,7 +147,6 @@ FCharacterStatSnapshot UECharacterStatComponent::MakeStatSnapshot() const
 	FCharacterStatSnapshot Out;
 	Out.Level               = CurrentLevel;
 	Out.Exp                 = CurrentExp;
-	Out.ExpToNextLevel      = ExpToNextLevel;
 	Out.StatPoints          = StatPoints;
 
 	Out.CurrentHp           = CurrentHp;
@@ -158,17 +157,6 @@ FCharacterStatSnapshot UECharacterStatComponent::MakeStatSnapshot() const
 	Out.BonusCriticalChance = BonusCriticalChance;
 	Out.BonusCriticalDamage = BonusCriticalDamage;
 	
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] Level: %d"),            Out.Level);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] Exp: %.0f / %.0f"),     Out.Exp, Out.ExpToNextLevel);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] StatPoints: %d"),       Out.StatPoints);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] CurrentHp: %.0f"),      Out.CurrentHp);
-
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusMaxHp: %.0f"),          Out.BonusMaxHp);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusAttack: %.0f"),         Out.BonusAttack);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusDefence: %.0f"),        Out.BonusDefence);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusCritChance: %.2f"),     Out.BonusCriticalChance);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusCritDamage: %.0f"),     Out.BonusCriticalDamage);
-	
 	return Out;    // 값‑복사
 }
 
@@ -177,7 +165,6 @@ void UECharacterStatComponent::ApplyStatSnapshot(const FCharacterStatSnapshot& I
 	/* 진행도 */
 	CurrentLevel = InSnapshot.Level;
 	CurrentExp   = InSnapshot.Exp;
-	ExpToNextLevel = InSnapshot.ExpToNextLevel;
 	StatPoints   = InSnapshot.StatPoints;
 
 	/* 보너스 스탯 */
@@ -189,17 +176,6 @@ void UECharacterStatComponent::ApplyStatSnapshot(const FCharacterStatSnapshot& I
 
 	/* 실시간 값 – MaxHp 가 달라졌을 수 있으니 Clamp */
 	CurrentHp = FMath::Clamp(InSnapshot.CurrentHp, 0.f, GetMaxHp());
-
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] Level: %d"),            CurrentLevel);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] Exp: %.0f / %.0f"),     CurrentExp, ExpToNextLevel);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] StatPoints: %d"),       StatPoints);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] CurrentHp: %.0f"),      CurrentHp);
-
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusMaxHp: %.0f"),          BonusMaxHp);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusAttack: %.0f"),         BonusAttack);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusDefence: %.0f"),        BonusDefence);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusCritChance: %.2f"),     BonusCriticalChance);
-	UE_LOG(LogTemp, Warning, TEXT("[Snapshot] BonusCritDamage: %.0f"),     BonusCriticalDamage);
 
 	/* UI 동기화를 위해 델리게이트 브로드캐스트 */
 	OnHpChanged.Broadcast(CurrentHp);

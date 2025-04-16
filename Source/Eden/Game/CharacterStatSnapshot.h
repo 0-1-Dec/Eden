@@ -12,7 +12,6 @@ public:
 	/* 진행도 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32  Level      = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float  Exp        = 0.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) float  ExpToNextLevel  = 150.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32  StatPoints = 0;
 
 	/* 실시간 값 */

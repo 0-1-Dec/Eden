@@ -16,6 +16,8 @@ Content/Survivor
 Content/__ExternalActors__
 Content/__ExternalObjects__
 .vscode
+.vsconfig
+*.png
 .vs
 *.VC.db
 *.opensdf
