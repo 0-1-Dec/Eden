@@ -43,7 +43,7 @@ void UEStatPanelWidget::OnAddButtonClicked(UButton* ClickedBtn)
 	if(ClickedBtn == AddAttackBtn) {
 		UE_LOG(LogTemp,Warning,TEXT("Button Match: AddAttackBtn clicked!")); CurrentStatComp->AddBonusStat(ECharacterStatType::BonusAttack);
 	}
-	if(ClickedBtn == AddDefenseBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusDefense);
+	if(ClickedBtn == AddDefenseBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusDefence);
 	if(ClickedBtn == AddCriticalChanceBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalChance);
 	if(ClickedBtn == AddCriticalDamageBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalDamage);
 
@@ -55,7 +55,7 @@ void UEStatPanelWidget::UpdateDisplay()
 {
 	BonusMaxHPTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusMaxHP)));
 	BonusAttackTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusAttack)));
-	BonusDefenseTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusDefense)));
+	BonusDefenseTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusDefence)));
 	BonusCriticalChanceTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalChance)));
 	BonusCriticalDamageTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalDamage)));
 	RemainStatPoint->SetText(FText::AsNumber(CurrentStatComp->StatPoints));
