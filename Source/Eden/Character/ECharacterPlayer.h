@@ -11,7 +11,6 @@
 #include "Item/EBothSkillVFXActor.h"
 #include "UI/EInventoryWidget.h"
 #include "UI/ECrosshairWidget.h"
-#include "UI/EHUDWidget.h"
 #include "UI/EStatPanelWidget.h"
 #include "ECharacterPlayer.generated.h"
 
@@ -203,6 +202,9 @@ protected:
 	
 // UI 섹션
 protected:
+	UPROPERTY()
+	TObjectPtr<class UEHUDWidget> HUDWidgetInstance;
+	
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
 
 //스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)

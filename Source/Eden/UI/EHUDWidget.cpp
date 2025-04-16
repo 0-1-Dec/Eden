@@ -81,7 +81,7 @@ void UEHUDWidget::UpdateHpBar(float NewCurrentHp)
 	}
 }
 
-void UEHUDWidget::UpdateExp(float NewExp)
+void UEHUDWidget::UpdateExpBar(float NewExp)
 {
 	CurrentExp = NewExp;
 	ExpToNextLevel = CurrentStatComp->GetStatRow(CurrentLevel)->ExpToNextLevel;
@@ -90,6 +90,11 @@ void UEHUDWidget::UpdateExp(float NewExp)
 	{
 		ExpProgressBar->SetPercent(CurrentExp / ExpToNextLevel);
 	}
+}
+
+void UEHUDWidget::UpdateLevel()
+{
+	CurrentLevel++;
 }
 
 void UEHUDWidget::UpdateSkillIcon(EWeaponType CurrentWeapon)
