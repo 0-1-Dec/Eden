@@ -177,20 +177,21 @@ protected:
 	int32 VFXSpawnIndex = 0;
 	FTimerHandle VFXTimerHandle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = VFX)
 	UParticleSystem* SkillEffect;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = VFX)
 	UParticleSystem* LastSkillEffect;
 	
 	virtual void ExecuteBothSkill() override;
-	void SpawnNextVFX();
 	void SpawnSequentialVFX();
-	void SpawnLastVFX();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = VFX)
 	TSubclassOf<class AEBothSkillVFXActor> BothSkillVFXActor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = VFX)
+	TSubclassOf<class AESkillPathVFX> SkillPathVFXActor;
+	
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Skill)
 	APawn* NearestTargetPawn = nullptr;

@@ -26,9 +26,7 @@ void AEBothSkillVFXActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetLifeSpan(1.f);
-
-	DrawDebugSphere(GetWorld(), GetActorLocation(), 300.f, 32, FColor::Yellow, false, 1.0f);
+	SetLifeSpan(2.5f);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AEBothSkillVFXActor::OnSphereOverlap);
 }

@@ -4,6 +4,8 @@
 #include "AI/BossAI/BTTask_ProjectileAttack.h"
 
 #include "AIController.h"
+#include "AI/EAI.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Character/ECharacterBoss.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -86,6 +88,11 @@ EBTNodeResult::Type UBTTask_ProjectileAttack::ExecuteTask(UBehaviorTreeComponent
 				SpawnedProjectile->MovementComponent->Velocity = LaunchVelocity;
 			}
 		}
+	}
+
+	if (UBlackboardComponent* BBComp = OwnerComp.GetBlackboardComponent())
+	{
+		BBComp->SetValueAsBool(BBKEY_ISPROJECTILE, false);
 	}
 	
 	return EBTNodeResult::Succeeded;

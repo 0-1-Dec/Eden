@@ -72,7 +72,6 @@ void AEAoEActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (APawn* OverlappedPawn = Cast<APawn>(OtherActor))
 	{
 		OverlappingPawns.Add(OverlappedPawn);
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *OverlappedPawn->GetName());
 	}
 }
 

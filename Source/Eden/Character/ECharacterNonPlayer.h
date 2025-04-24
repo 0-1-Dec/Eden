@@ -26,8 +26,9 @@ public:
 	virtual void PostInitializeComponents() override;
 
 protected:
-	void BeginPlay() override;
-	void SetDead() override;
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void SetDead() override;
 
 protected:
 	virtual float GetAIPatrolRadius() override;

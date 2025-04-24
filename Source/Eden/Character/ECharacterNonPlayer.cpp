@@ -28,20 +28,39 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 
 	HpBar = CreateDefaultSubobject<UEWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
-	HpBar->SetRelativeLocation(FVector(0, 0, 250.0f));
+	HpBar->SetRelativeLocation(FVector(0, 0, 200.0f));
 	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/Eden/UI/WBP_HpBarWidget.WBP_HpBarWidget_C"));
 	if (HpBarWidgetRef.Class)
 	{
 		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
-		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetWidgetSpace(EWidgetSpace::World);
 		HpBar->SetDrawSize(FVector2D(100.f, 10.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AECharacterNonPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AECharacterNonPlayer::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (HpBar)
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PC && PC->PlayerCameraManager)
+		{
+			FVector CameraLocation = PC->PlayerCameraManager->GetCameraLocation();
+			FVector WidgetLocation = HpBar->GetComponentLocation();
+			FRotator NewRotation = (CameraLocation - WidgetLocation).Rotation();
+			HpBar->SetWorldRotation(NewRotation);
+		}
+	}
 }
 
 void AECharacterNonPlayer::PostInitializeComponents()
@@ -86,7 +105,7 @@ float AECharacterNonPlayer::GetAIPatrolRadius()
 
 float AECharacterNonPlayer::GetAIDetectRange()
 {
-	return 400.0f;
+	return 600.0f;
 }
 
 float AECharacterNonPlayer::GetAIAttackRange()

@@ -43,6 +43,13 @@ void AEBossAttackableProjectile::BeginPlay()
 void AEBossAttackableProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor == Owner)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("OtherActor : %s"), *OtherActor->GetName());
+	
 	FVector SpawnLocation = Hit.ImpactPoint + FVector::UpVector * 0.01f;
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 	FActorSpawnParameters SpawnParameters;
