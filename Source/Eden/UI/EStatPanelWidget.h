@@ -50,6 +50,20 @@ protected:
     UPROPERTY(meta = (BindWidget))
     class UButton* AddCriticalDamageBtn;
 
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* FinalMaxHPTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* FinalAttackTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* FinalDefenseTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* FinalCriticalChanceTxt;
+
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* FinalCriticalDamageTxt;
 
     UFUNCTION(BlueprintCallable)
     void OnAddButtonClicked(UButton* ClickedBtn);

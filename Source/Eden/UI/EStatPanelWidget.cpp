@@ -59,4 +59,5 @@ void UEStatPanelWidget::UpdateDisplay()
 	BonusCriticalChanceTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalChance)));
 	BonusCriticalDamageTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalDamage)));
 	RemainStatPoint->SetText(FText::AsNumber(CurrentStatComp->StatPoints));
+
 }
