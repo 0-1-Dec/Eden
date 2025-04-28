@@ -297,6 +297,15 @@ void AECharacterPlayer::TryBowChargeEnd()
 
 void AECharacterPlayer::Attack()
 {
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FRotator CamRot;
+		FVector CamLoc;
+		PC->GetPlayerViewPoint(CamLoc, CamRot);
+		FRotator NewYaw(0.f, CamRot.Yaw, 0.f);
+		SetActorRotation(NewYaw);
+	}
+	
 	ProcessComboCommand();
 }
 
@@ -646,6 +655,8 @@ APawn* AECharacterPlayer::FindNearestPawnInAttackRange()
 			}
 		}
 	}
+	else
+		UE_LOG(LogTemp, Error, TEXT("No bResult Found"));
 	
 	return NearestPawn;
 }

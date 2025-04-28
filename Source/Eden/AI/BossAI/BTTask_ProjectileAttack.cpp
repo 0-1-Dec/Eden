@@ -33,14 +33,13 @@ EBTNodeResult::Type UBTTask_ProjectileAttack::ExecuteTask(UBehaviorTreeComponent
 	}
 
 	UWorld* World = BossCharacter->GetWorld();
-	FVector StartLocation = BossCharacter->GetActorLocation() + FVector(0.f, 0.f, 200.f);
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(BossCharacter);
 
 	// 보스 머리 위 지점
 	FVector BossLoc = BossCharacter->GetActorLocation();
-	FVector SpawnBaseLocation = BossLoc + FVector(0.f, 0.f, 200.f);
+	FVector SpawnBaseLocation = BossLoc + SpawnOffset;
 	
 	// 한번에 10발 발사
 	int32 NumProjectiles = 10;
@@ -50,7 +49,7 @@ EBTNodeResult::Type UBTTask_ProjectileAttack::ExecuteTask(UBehaviorTreeComponent
 		// 1) 무작위 각도 + 무작위 속도
 		float RandomAngle   = FMath::RandRange(0.f, 2.f * PI);  // 0 ~ 360도
 		float RandomSpeedXY = FMath::RandRange(600.f, 1000.f); // XY 평면 속도 범위
-		float UpwardSpeedZ  = 2000.f;                           // 위로 쏘는 속도 고정 or 랜덤
+		float UpwardSpeedZ  = FMath::RandRange(1000.f, 2000.f); // 위로 쏘는 속도 고정 or 랜덤
 
 		// 2) (Angle -> X,Y) 단위 벡터 구하기
 		FVector2D Dir2D(FMath::Cos(RandomAngle), FMath::Sin(RandomAngle));
@@ -74,7 +73,7 @@ EBTNodeResult::Type UBTTask_ProjectileAttack::ExecuteTask(UBehaviorTreeComponent
 
 		ActorsToIgnore.Add(SpawnedProjectile);
 
-		PredictAndDrawImpactPoint(World, StartLocation, LaunchVelocity, 15.f, ActorsToIgnore, 0);
+		PredictAndDrawImpactPoint(World, SpawnBaseLocation, LaunchVelocity, 15.f, ActorsToIgnore, 0);
 
 		if (SpawnedProjectile)
 		{

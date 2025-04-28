@@ -25,6 +25,11 @@ void AERandomSpawn::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
+	if (IsActivated)
+	{
+		return;
+	}
+
 	APawn* Pawn = Cast<APawn>(OtherActor);
 	if (!Pawn || !Pawn->IsPlayerControlled()) return;
 
@@ -45,6 +50,8 @@ void AERandomSpawn::NotifyActorBeginOverlap(AActor* OtherActor)
 			GetWorld()->SpawnActor<AECharacterNonPlayer>(MonsterClass, SpawnPos, FRotator::ZeroRotator);
 		}
 	}
+
+	IsActivated = true;
 }
 
 

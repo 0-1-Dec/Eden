@@ -32,11 +32,17 @@ void AEBothSkillVFXActor::BeginPlay()
 }
 
 void AEBothSkillVFXActor::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                          UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (APawn* OverlappedPawn = Cast<APawn>(OtherActor))
 	{
-		UGameplayStatics::ApplyDamage(OverlappedPawn, Damage, OverlappedPawn->GetController(), this, nullptr);
-		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),OverlappedPawn->GetActorLocation() + FVector(0, 0, 100.0f),FRotator::ZeroRotator)->Init(Damage);
+		FTimerDelegate Del;
+		Del.BindLambda([this, OverlappedPawn]()
+		{
+			UGameplayStatics::ApplyDamage(OverlappedPawn, Damage, OverlappedPawn->GetController(), this, nullptr);
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),OverlappedPawn->GetActorLocation() + FVector(0, 0, 100.0f),FRotator::ZeroRotator)->Init(Damage);
+		});
+		
+		GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, Del, 0.5f, false);
 	}
 }

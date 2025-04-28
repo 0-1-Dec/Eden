@@ -23,8 +23,11 @@ protected:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=AoE)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Spawn)
 	USphereComponent* CollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Spawn)
+	bool IsActivated = false;
 
 public:
 	UPROPERTY(EditAnywhere)
