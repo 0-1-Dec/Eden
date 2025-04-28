@@ -4,6 +4,7 @@
 #include "AI/BossAI/BTTask_WideAoE.h"
 
 #include "AIController.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AI/EAI.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/ECharacterBoss.h"
@@ -42,7 +43,16 @@ EBTNodeResult::Type UBTTask_WideAoE::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 
 	if (AoEMontage)
 	{
-		Boss->PlayAnimMontage(AoEMontage, 1.f);
+		UAnimInstance* AnimInstance = Boss->GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(AoEMontage);
+
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AIController, Boss]()
+		{
+			PlayVFX(AIController, Boss);
+		},
+		1.5f,
+		false
+		);
 	}
 
 	return EBTNodeResult::InProgress;
@@ -79,7 +89,8 @@ void UBTTask_WideAoE::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 			FQuat::Identity,
 			ECC_Pawn,
 			FCollisionShape::MakeSphere(AoERadius),
-			QueryParams);
+			QueryParams
+		);
 
 		for (auto& Result : Overlaps)
 		{
@@ -98,7 +109,20 @@ void UBTTask_WideAoE::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISSTAGGERED, false);
 
+		bHasSpawnedVFX = false;
 		Boss->GetCharacterMovement()->SetMovementMode(MOVE_NavWalking);
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
+}
+
+void UBTTask_WideAoE::PlayVFX(AAIController* AIController, AECharacterBoss* Boss)
+{
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				Boss->GetWorld(),
+				AttackVfxSystem,
+				Boss->GetActorLocation(),
+				FRotator::ZeroRotator,
+				FVector::OneVector,
+				true
+	);	
 }

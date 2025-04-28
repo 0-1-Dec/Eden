@@ -6,8 +6,9 @@
 #include "Character/ECharacterBase.h"
 #include "Interface/EGeneralAIInterface.h"
 #include "Components/WidgetComponent.h"
-#include "UI/EEnemyHPBarWidget.h"
+#include "Engine/StreamableManager.h"
 #include "GameData/EDropDataAsset.h"
+#include "GameData/ENPCMeshDataAsset.h"
 #include "Interface/ECharacterWidgetInterface.h"
 #include "Item/EDroppedItem.h"
 #include "ECharacterNonPlayer.generated.h"
@@ -15,7 +16,8 @@
 /**
  * 
  */
-UCLASS()
+
+UCLASS(config=Eden)
 class EDEN_API AECharacterNonPlayer : public AECharacterBase, public IEGeneralAIInterface, public IECharacterWidgetInterface
 {
 	GENERATED_BODY()
@@ -26,8 +28,15 @@ public:
 	virtual void PostInitializeComponents() override;
 
 protected:
-	void BeginPlay() override;
-	void SetDead() override;
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void SetDead() override;
+
+	void OnNPCDataLoaded();
+	void OnAnimBpLoaded();
+	void OnWeaponDataLoaded();
+	void OnMeshLoaded();
+	void OnMaterialsLoaded();
 
 protected:
 	virtual float GetAIPatrolRadius() override;
@@ -59,4 +68,17 @@ protected:
 	TObjectPtr<class UWidgetComponent> HpBar;
 
 	virtual void SetUpCharacterWidget(class UEUserWidget* InUserWidget) override;
+
+	// NPC 랜덤 메쉬 섹션
+protected:
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UENPCMeshDataAsset> NPCDataAsset;
+
+	TSharedPtr<FStreamableHandle> NPCDataHandle;
+	TSharedPtr<FStreamableHandle> AnimBPHandle;
+	TSharedPtr<FStreamableHandle> WeaponDataHandle;
+	TSharedPtr<FStreamableHandle> MeshHandle;
+	TSharedPtr<FStreamableHandle> MaterialHandle;
+
+	int32 SelectedEntryIndex = INDEX_NONE;
 };
