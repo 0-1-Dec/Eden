@@ -92,6 +92,7 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
 	float BaseCriticalDamage = 0.f;
 
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = Stat)
 	float BonusMaxHp = 0.f;
 
@@ -108,10 +109,38 @@ protected:
 	float BonusCriticalDamage = 0.f;
 
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
+	float FinalMaxHp = 0.f;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
+	float FinalAttack = 0.f;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
+	float FinalDefense = 0.f;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
+	float FinalCriticalChance = 0.f;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Stat)
+	float FinalCriticalDamage = 0.f;
+
 public:
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetMaxHp(float NewMaxHp) { CurrentHp = NewMaxHp; BaseMaxHp = CurrentHp; }
+	FORCEINLINE void SetMaxHp(float NewMaxHp) { BaseMaxHp = NewMaxHp; }
 	
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetAttack(float NewAttack) {BaseAttack = NewAttack;}
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetDefense(float NewDefense) {BaseDefence = NewDefense;}
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetCriticalChance(float NewCriticalChance) {BaseCriticalChance = NewCriticalChance;}
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetCriticalDamage(float NewCriticalDamage) {BaseCriticalDamage = NewCriticalDamage;}
+
+
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetCurrentLevel() const { return CurrentLevel; }
 
@@ -128,7 +157,7 @@ public:
 	FORCEINLINE float GetAttack() const {return BaseAttack + BonusAttack * 5;}
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetDefense() const {return BonusDefence + BonusDefence * 3;}
+	FORCEINLINE float GetDefense() const {return BaseDefence + BonusDefence * 3;}
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetCriticalChance() const {return BaseCriticalChance + BonusCriticalChance;}
@@ -138,6 +167,16 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void HealUp(float Amount); 
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetFinalStats() {
+		FinalMaxHp = GetMaxHp();
+		FinalAttack = GetAttack();
+		FinalDefense = GetDefense();
+		FinalCriticalChance = GetCriticalChance();
+		FinalCriticalDamage = GetCriticalDamage();
+	}
+
 
 // 경험치 섹션
 public:
@@ -162,6 +201,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void AddBonusStat(ECharacterStatType StatType);
+
+	void PlayerStatDataTableLoading(int32 Level);
 
 // stat snapshot 섹션
 public:
