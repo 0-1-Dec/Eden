@@ -40,9 +40,7 @@ void UEStatPanelWidget::OnAddButtonClicked(UButton* ClickedBtn)
 	if(CurrentStatComp->StatPoints <= 0) return;
 
 	if(ClickedBtn == AddMaxHPBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusMaxHP);
-	if(ClickedBtn == AddAttackBtn) {
-		UE_LOG(LogTemp,Warning,TEXT("Button Match: AddAttackBtn clicked!")); CurrentStatComp->AddBonusStat(ECharacterStatType::BonusAttack);
-	}
+	if(ClickedBtn == AddAttackBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusAttack);
 	if(ClickedBtn == AddDefenseBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusDefence);
 	if(ClickedBtn == AddCriticalChanceBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalChance);
 	if(ClickedBtn == AddCriticalDamageBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalDamage);
@@ -53,11 +51,17 @@ void UEStatPanelWidget::OnAddButtonClicked(UButton* ClickedBtn)
 
 void UEStatPanelWidget::UpdateDisplay()
 {
+	UE_LOG(LogTemp,Warning,TEXT("Display Updated!!"));
 	BonusMaxHPTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusMaxHP)));
 	BonusAttackTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusAttack)));
 	BonusDefenseTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusDefence)));
 	BonusCriticalChanceTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalChance)));
 	BonusCriticalDamageTxt->SetText(FText::AsNumber(CurrentStatComp->GetBonusStat(ECharacterStatType::BonusCriticalDamage)));
-	RemainStatPoint->SetText(FText::AsNumber(CurrentStatComp->StatPoints));
 
+	FinalMaxHPTxt->SetText(FText::AsNumber(CurrentStatComp->GetMaxHp()));
+	FinalAttackTxt->SetText(FText::AsNumber(CurrentStatComp->GetAttack()));
+	FinalDefenseTxt->SetText(FText::AsNumber(CurrentStatComp->GetDefense()));
+	FinalCriticalChanceTxt->SetText(FText::AsNumber(CurrentStatComp->GetCriticalChance()));
+	FinalCriticalDamageTxt->SetText(FText::AsNumber(CurrentStatComp->GetCriticalDamage()));
+	RemainStatPoint->SetText(FText::AsNumber(CurrentStatComp->StatPoints));
 }

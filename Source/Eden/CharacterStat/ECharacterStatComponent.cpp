@@ -89,6 +89,8 @@ void UECharacterStatComponent::LevelUp()
 {
 	CurrentLevel += 1;
 	StatPoints += GetStatRow(CurrentLevel)->StatPoint;
+	PlayerStatDataTableLoading(CurrentLevel);
+	SetFinalStats();
 	OnLevelChanged.Broadcast();
 	UE_LOG(LogTemp,Warning,TEXT("LEVEL UP!!"));
 }
@@ -139,6 +141,25 @@ float UECharacterStatComponent::GetBonusStat(ECharacterStatType StatType) const
 		return BonusCriticalDamage;
 	default:
 		return 0.f;
+	}
+}
+
+void UECharacterStatComponent::PlayerStatDataTableLoading(int32 Level){
+	if(!StatDataTable) return;
+
+	FName RowName = FName(*FString::FromInt(Level));
+	const FStatDataRow* StatRow = StatDataTable->FindRow<FStatDataRow>(RowName,TEXT("Lookup Stat Row"));
+
+	if(StatRow)
+	{
+		BaseMaxHp = StatRow->BaseMaxHP;
+		BaseAttack = StatRow->BaseAttack;
+		BaseDefence = StatRow->BaseDefense;
+		BaseCriticalChance = StatRow->BaseCriticalChance;
+		BaseCriticalDamage = StatRow->BaseCriticalDamage;
+	} else
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Stat Row %s not found in DataTable!"),*RowName.ToString());
 	}
 }
 
