@@ -184,6 +184,7 @@ void AECharacterPlayer::BeginPlay()
 	}
 
 	Stat->OnExpGain.AddUObject(this, &AECharacterPlayer::ExpGain);
+	Stat->PlayerStatDataTableLoading(Stat->GetCurrentLevel());
 
 	SetWeaponData(OneHandedData);
 

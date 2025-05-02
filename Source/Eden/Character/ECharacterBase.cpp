@@ -220,7 +220,8 @@ void AECharacterBase::AttackHitCheck()
 	// 공격 범위, 반경, 그리고 데미지 값을 정의합니다.
 	const float AttackRange = CurrentWeaponData->AttackRange;
 	const float AttackRadius = CurrentWeaponData->AttackRadius;
-	const float AttackDamage = CurrentWeaponData->BaseDamage;
+	//const float AttackDamage = CurrentWeaponData->BaseDamage; 기존 공격력 방식
+	const float AttackDamage = Stat->GetAttack() + CurrentWeaponData->BaseDamage;
 
 	// 공격 시작 지점: 캐릭터 위치에 콜리전 캡슐 반경만큼 전진한 위치
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
