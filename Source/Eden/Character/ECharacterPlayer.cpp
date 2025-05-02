@@ -23,6 +23,8 @@
 
 AECharacterPlayer::AECharacterPlayer()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -132,6 +134,12 @@ AECharacterPlayer::AECharacterPlayer()
 		DodgeAction = InputDodgeRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputPotionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Potion.IA_Potion'"));
+	if(nullptr != InputPotionRef.Object)
+	{
+		DrinkPotionAction = InputPotionRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> OneHand_WeaponMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PostApocalypticMeleeWeapons/Meshes/SK_ShivGlass.SK_ShivGlass'"));
 	if (OneHand_WeaponMeshRef.Object)
 	{
@@ -179,6 +187,10 @@ void AECharacterPlayer::BeginPlay()
 	Stat->PlayerStatDataTableLoading(Stat->GetCurrentLevel());
 
 	SetWeaponData(OneHandedData);
+
+	DefaultFOV = FollowCamera->FieldOfView;
+	ZoomFOV = 30.f;
+	ZoomSpeed = 10.f;
 }
 
 void AECharacterPlayer::SetDead()
@@ -189,6 +201,17 @@ void AECharacterPlayer::SetDead()
 	{
 		DisableInput(PlayerController);
 	}
+}
+
+void AECharacterPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	const float TargetFOV = bIsZoomedIn ? ZoomFOV : DefaultFOV;
+	const float CurrentFOV = FollowCamera->FieldOfView;
+	const float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, ZoomSpeed);
+
+	FollowCamera->SetFieldOfView(NewFOV);
 }
 
 void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -204,6 +227,8 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Triggered, this, &AECharacterPlayer::Dodge);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AECharacterPlayer::TryBowChargeStart);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AECharacterPlayer::TryBowChargeEnd);
+	EnhancedInputComponent->BindAction(DrinkPotionAction, ETriggerEvent::Started, this, &AECharacterPlayer::DrinkPotion);
+	
 
 	// 무기 교체
 	EnhancedInputComponent->BindAction(OneHandedAction, ETriggerEvent::Started, this, &AECharacterPlayer::SwapOneHanded);
@@ -411,15 +436,14 @@ void AECharacterPlayer::ToggleInventoryUI()
 		{
 			InventoryWidgetInstance = CreateWidget<UEInventoryWidget>(PC, InventoryWidgetClass);
 
-			const FVector2D InitialPos = FVector2D(1200.f, 200.f);
+			const FVector2D InitialPos = FVector2D(1100.f, 200.f);
 			const FVector2D DesiredSize = FVector2D(600.f, 650.f);
 
 			InventoryWidgetInstance->SetAnchorsInViewport(FAnchors(0.f, 0.f));
 			InventoryWidgetInstance->SetAlignmentInViewport(FVector2D(0.f, 0.f));
 
-			InventoryWidgetInstance->SetPositionInViewport(InitialPos, /*bRemoveDPIScale=*/true);
-
-			// ③ 크기 : 원하는 픽셀 값
+			InventoryWidgetInstance->SetPositionInViewport(InitialPos, true);
+			
 			InventoryWidgetInstance->SetDesiredSizeInViewport(DesiredSize);
 
 			InventoryWidgetInstance->AddToViewport();
@@ -484,11 +508,11 @@ void AECharacterPlayer::ShootArrow()
 	{
 		if (bIsZoomedIn)
 		{
-			Projectile->InitProjectile(200.f, 5000.f);	
+			Projectile->InitProjectile(BowData->BaseDamage, 5000.f);	
 		}
 		else
 		{
-			Projectile->InitProjectile(200.f, 3000.f);
+			Projectile->InitProjectile(BowData->BaseDamage, 3000.f);
 		}
 	}
 }
@@ -519,13 +543,6 @@ void AECharacterPlayer::BowZoomIn()
 		{
 			GetCharacterMovement()->bOrientRotationToMovement = false;
 		}
-
-		FollowCamera -> SetFieldOfView(30.f);
-
-		if (CameraBoom)
-		{
-			CameraBoom->SocketOffset = FVector(0.f, 50.f, 70.f);
-		}
 		
 		bIsZoomedIn = true;
 	}
@@ -549,8 +566,6 @@ void AECharacterPlayer::BowZoomOut()
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
-	
-	FollowCamera -> SetFieldOfView(90.f);
 }
 
 void AECharacterPlayer::ExecuteSkill()
@@ -574,6 +589,15 @@ void AECharacterPlayer::ExecuteSkill()
 		}
 
 		NearestTargetPawn = FoundTarget;
+	}
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FRotator CamRot;
+		FVector CamLoc;
+		PC->GetPlayerViewPoint(CamLoc, CamRot);
+		FRotator NewYaw(0.f, CamRot.Yaw, 0.f);
+		SetActorRotation(NewYaw);
 	}
 	
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
@@ -688,7 +712,7 @@ void AECharacterPlayer::ShootHomingArrow(APawn* Nearest)
 					ProjMovement->HomingAccelerationMagnitude = 10000.f;
 					ProjMovement->HomingTargetComponent = Nearest->GetComponentByClass<UCapsuleComponent>();
 				}
-				Projectile->InitProjectile(200.f, 1500.f);
+				Projectile->InitProjectile(BowData->BaseDamage, 1500.f);
 				
 				Nearest->FindComponentByClass<UECharacterStatComponent>()->OnHpZero.AddUObject(Projectile, &AEArrow::OnTargetDestroyed);
 			}
@@ -800,4 +824,12 @@ void AECharacterPlayer::ToggleSettingUI(){
 		PC->SetInputMode(InputMode);
 		PC->bShowMouseCursor = true;
 	}
+}
+
+void AECharacterPlayer::DrinkPotion()
+{
+	Stat->HealUp(50.f);
+	/*
+	 * 포션 수량 부분 추가 예정
+	 */
 }

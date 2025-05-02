@@ -28,6 +28,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetDead() override;
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -83,6 +84,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> OpenSettingAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> DrinkPotionAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -159,6 +163,10 @@ public:
 	bool bIsAttackInput = false;
 	bool bIsZoomedIn = false;
 
+	float DefaultFOV;
+	float ZoomFOV;
+	float ZoomSpeed;
+
 // 스킬 섹션
 protected:
 	bool bCanUseSkill = true;
@@ -230,4 +238,8 @@ public:
 	UUserWidget* SettingUIInstance;
 
 	bool bSettingUIOpen = false;
+
+// 포션 섹션
+protected:
+	void DrinkPotion();
 };

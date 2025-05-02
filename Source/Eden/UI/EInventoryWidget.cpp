@@ -25,6 +25,8 @@ void UEInventoryWidget::NativeConstruct()
     CreateInventorySlots();
     RefreshInventory();
 
+    SetAlignmentInViewport(FVector2D(0.f, 0.f));
+
     if (LinkedInventory)
     {
         LinkedInventory->OnInventoryChanged.AddDynamic(this, &UEInventoryWidget::HandleInventoryChanged);
@@ -137,14 +139,8 @@ FReply UEInventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, c
     {
         bDragging = true;
         const FVector2D ScreenPos = InMouseEvent.GetScreenSpacePosition();
-        const FVector2D WidgetPos = GetCachedGeometry().GetAbsolutePosition();
-        DragOffset = ScreenPos - WidgetPos;
-
-        if (TSharedPtr<SWidget> CachedWidget = GetCachedWidget())
-        {
-            // ToSharedRef()로 변환
-            return FReply::Handled().CaptureMouse(CachedWidget.ToSharedRef());
-        }
+        DragOffset = InGeometry.AbsoluteToLocal(ScreenPos);
+        return FReply::Handled().CaptureMouse(GetCachedWidget().ToSharedRef());
     }
     return Super::NativeOnMouseButtonDown(InGeometry,InMouseEvent);
 }
@@ -165,8 +161,7 @@ FReply UEInventoryWidget::NativeOnMouseMove(const FGeometry& InGeometry, const F
     {
         const FVector2D ScreenPos = InMouseEvent.GetScreenSpacePosition();
         const FVector2D NewPos = ScreenPos - DragOffset;
-
-        // DPI 보정 없이 그대로 이동하고 싶으면 두 번째 인자를 true 로
+        
         SetPositionInViewport(NewPos, true); 
         
         return FReply::Handled();

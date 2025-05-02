@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "EComboActionData.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Animation/EAnimInstance.h"
 #include "Physics/ECollision.h"
 #include "Engine/DamageEvents.h"
@@ -236,8 +237,30 @@ void AECharacterBase::AttackHitCheck()
 		FDamageEvent DamageEvent;
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
 
+		if (GetController()->IsPlayerController() && CurrentWeaponData->Weapon == EWeaponType::BothHanded)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			AttackVfxSystem,
+			OutHitResult.ImpactPoint,
+			FRotator::ZeroRotator,
+			FVector::OneVector,
+			true
+			);
+		}
+
 		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
-		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage);
+		if (GetController()->IsPlayerController())
+		{
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage, FColor::Red);	
+		}
+		else
+		{
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,
+			                                            FRotator::ZeroRotator)->Init(
+				AttackDamage,FColor(128,128,128,255));
+		}
+		
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.

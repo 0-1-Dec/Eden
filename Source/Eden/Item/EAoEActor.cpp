@@ -95,7 +95,7 @@ void AEAoEActor::ApplyContinuousDamage()
 	{
 		if (!IsValid(Pawn)) continue;
 		UGameplayStatics::ApplyDamage(Pawn, Damage, Pawn->GetController(), this, nullptr);
-		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),Pawn->GetActorLocation() + FVector(0, 0, 100.f),FRotator::ZeroRotator)->Init(Damage);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),Pawn->GetActorLocation() + FVector(0, 0, 100.f),FRotator::ZeroRotator)->Init(Damage, FColor::White);
 		Boss->HealUp(Damage * 10.f);
 	}
 }

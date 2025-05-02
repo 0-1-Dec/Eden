@@ -76,17 +76,19 @@ void UEInventorySlotWidget::UpdateSlotUI()
 	if (SlotData.ItemData == nullptr || SlotData.Quantity <= 0)
 	{
 		if (IconImage)
+		{
 			IconImage->SetBrushFromTexture(Icon);
+		}
 		if (QuantityText)
 			QuantityText->SetText(FText::GetEmpty());
 		return;
 	}
-
+	
 	if (IconImage && SlotData.ItemData->ItemIcon)
 	{
 		IconImage->SetBrushFromTexture(SlotData.ItemData->ItemIcon);
 	}
-
+	
 	if (QuantityText)
 	{
 		QuantityText->SetText(FText::AsNumber(SlotData.Quantity));

@@ -47,6 +47,8 @@ AECharacterNonPlayer::AECharacterNonPlayer()
 void AECharacterNonPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Stat->SetMaxHp(100.f);
 }
 
 void AECharacterNonPlayer::Tick(float DeltaSeconds)
@@ -163,32 +165,25 @@ void AECharacterNonPlayer::OnMeshLoaded()
 			GetMesh()->SetSkeletalMesh(NPCMesh);
 			GetMesh()->SetHiddenInGame(false);
 			
-			// 2) 로컬 바운드(피벗 기준) 구하기
-			//    Origin.Z = 피벗에서 바운드 중심까지의 높이
-			//    BoxExtent.Z = 바운드 절반 높이
 			const FBoxSphereBounds LocalBounds = NPCMesh->GetBounds();
 			const float Radius      = FMath::Max(LocalBounds.BoxExtent.X, LocalBounds.BoxExtent.Y);
 			const float HalfHeight  = LocalBounds.BoxExtent.Z;
-
-			// 3) 캡슐 크기 바꾸기 전 oldHalfHeight 저장
+			
 			UCapsuleComponent* Capsule = GetCapsuleComponent();
 			const float OldHalfHeight = Capsule->GetUnscaledCapsuleHalfHeight();
-
-			// 4) 캡슐 재설정
+			
 			Capsule->SetCapsuleSize(Radius, HalfHeight);
-
-			// 5) Actor 위치 보정: 바닥 높이를 유지하도록
+			
 			const float DeltaHalf = HalfHeight - OldHalfHeight;
 			if (!FMath::IsNearlyZero(DeltaHalf))
 			{
 				AddActorWorldOffset(FVector(0, 0, DeltaHalf));
 			}
-
-			// 6) 메쉬 상대 위치 조정: 메쉬 바닥이 캡슐 바닥에 딱 붙도록
-			//    피벗에서 바운드 중심까지 올라간 만큼을 아래로 당겨 주면,
-			//    바운드 최저점(Origin.Z - HalfHeight)이 캡슐 바닥(-HalfHeight)과 일치합니다.
+			
 			const float PivotOffsetZ = -LocalBounds.Origin.Z;
-			GetMesh()->SetRelativeLocation(FVector(0, 0, PivotOffsetZ - 20.f));
+			GetMesh()->SetRelativeLocation(FVector(0, 0, PivotOffsetZ - 25.f));
+
+			HpBar->SetRelativeLocation(FVector(0, 0, HalfHeight * 2));
 		}
 	}
 }

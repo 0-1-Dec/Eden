@@ -15,7 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	ADamageFloatingText();
 
-	void Init(float InDamage);
+	void Init(float InDamage, FColor InColor);
 
 protected:
 	// Called when the game starts or when spawned
