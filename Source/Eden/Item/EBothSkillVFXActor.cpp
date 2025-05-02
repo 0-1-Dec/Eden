@@ -40,7 +40,7 @@ void AEBothSkillVFXActor::OnSphereOverlap(UPrimitiveComponent* OverlappedCompone
 		Del.BindLambda([this, OverlappedPawn]()
 		{
 			UGameplayStatics::ApplyDamage(OverlappedPawn, Damage, OverlappedPawn->GetController(), this, nullptr);
-			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),OverlappedPawn->GetActorLocation() + FVector(0, 0, 100.0f),FRotator::ZeroRotator)->Init(Damage);
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),OverlappedPawn->GetActorLocation() + FVector(0, 0, 100.0f),FRotator::ZeroRotator)->Init(Damage, FColor::White);
 		});
 		
 		GetWorld()->GetTimerManager().SetTimer(DamageTimerHandle, Del, 0.5f, false);

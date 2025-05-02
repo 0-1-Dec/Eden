@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraSystem.h"
 #include "GameFramework/Character.h"
 #include "Interface/EAnimationAttackInterface.h"
 #include "GameData/EWeaponDataAsset.h"
@@ -32,6 +33,9 @@ protected:
 	UEWeaponDataAsset* CurrentWeaponData;
 
 	void SetWeaponData(UEWeaponDataAsset* NewWeaponData);
+
+	UPROPERTY(EditAnywhere, Category = VFX)
+	UNiagaraSystem* AttackVfxSystem;
 	
 	// 콤보 애니메이션 섹션
 protected:

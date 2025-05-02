@@ -56,8 +56,9 @@ void ADamageFloatingText::Tick(float DeltaTime)
     }
 }
 
-void ADamageFloatingText::Init(float InDamage)
+void ADamageFloatingText::Init(float InDamage, FColor InColor)
 {
 	FString Text = FString::Printf(TEXT("-%d"),FMath::RoundToInt(InDamage));
+	TextRender->SetTextRenderColor(InColor);
 	TextRender->SetText(FText::FromString(Text));
 }

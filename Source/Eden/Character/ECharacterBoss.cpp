@@ -173,7 +173,7 @@ void AECharacterBoss::CloseAttackHitCheck()
 		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
 
 		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
-		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage);
+		GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage, FColor::White);
 	}
 
 	// 디버그 목적으로 공격 범위를 시각화합니다.

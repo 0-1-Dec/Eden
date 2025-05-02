@@ -118,11 +118,11 @@ void UBTTask_WideAoE::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 void UBTTask_WideAoE::PlayVFX(AAIController* AIController, AECharacterBoss* Boss)
 {
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				Boss->GetWorld(),
-				AttackVfxSystem,
-				Boss->GetActorLocation(),
-				FRotator::ZeroRotator,
-				FVector::OneVector,
-				true
+		Boss->GetWorld(),
+		AttackVfxSystem,
+		Boss->GetActorLocation(),
+		FRotator::ZeroRotator,
+		FVector::OneVector,
+		true
 	);	
 }
