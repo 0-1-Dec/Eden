@@ -27,4 +27,6 @@ public:
 	virtual void ShootHomingArrow(APawn* /*NearestTargetPawn*/) = 0;
 
 	virtual void ExecuteBothSkill() = 0;
+
+	virtual void ExecuteOneSkill() = 0;
 };

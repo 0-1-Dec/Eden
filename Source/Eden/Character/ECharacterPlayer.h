@@ -179,6 +179,8 @@ protected:
 	APawn* FindNearestPawnInAttackRange();
 	virtual void ShootHomingArrow(APawn* Nearest) override;
 
+	virtual void ExecuteOneSkill() override;
+
 // 양손 무기 스킬 섹션
 protected:
 	TArray<FVector> VFXSpawnLocations;
