@@ -39,7 +39,7 @@ void UEStatPanelWidget::OnAddButtonClicked(UButton* ClickedBtn)
 
 	if(CurrentStatComp->StatPoints <= 0) return;
 
-	if(ClickedBtn == AddMaxHPBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusMaxHP);
+	if(ClickedBtn == AddMaxHPBtn){CurrentStatComp->AddBonusStat(ECharacterStatType::BonusMaxHP); CurrentStatComp->HealUp(10);}
 	if(ClickedBtn == AddAttackBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusAttack);
 	if(ClickedBtn == AddDefenseBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusDefence);
 	if(ClickedBtn == AddCriticalChanceBtn) CurrentStatComp->AddBonusStat(ECharacterStatType::BonusCriticalChance);

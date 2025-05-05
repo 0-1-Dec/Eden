@@ -57,7 +57,7 @@ float UECharacterStatComponent::ApplyDamage(float InDamage)
 void UECharacterStatComponent::SetHp(float NewHp)
 {
 	// NewHp 값을 0과 최대 HP 값 사이로 제한하여 CurrentHp에 저장합니다.
-	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, BaseMaxHp);
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f,GetMaxHp());
 
 	// HP가 변경되었음을 알리기 위해 OnHpChanged 이벤트를 발생시킵니다.
 	OnHpChanged.Broadcast(CurrentHp);
@@ -66,8 +66,8 @@ void UECharacterStatComponent::SetHp(float NewHp)
 void UECharacterStatComponent::HealUp(float Amount)
 {
 	CurrentHp += Amount;
-	if (CurrentHp >= BaseMaxHp)
-		CurrentHp = BaseMaxHp;
+	if(CurrentHp >= GetMaxHp())
+		CurrentHp = GetMaxHp();
 
 	OnHpChanged.Broadcast(CurrentHp);
 }
@@ -91,6 +91,7 @@ void UECharacterStatComponent::LevelUp()
 	StatPoints += GetStatRow(CurrentLevel)->StatPoint;
 	PlayerStatDataTableLoading(CurrentLevel);
 	SetFinalStats();
+	HealUp(GetMaxHp());
 	OnLevelChanged.Broadcast();
 	UE_LOG(LogTemp,Warning,TEXT("LEVEL UP!!"));
 }

@@ -237,6 +237,7 @@ public:
 	UPROPERTY()
 	UUserWidget* SettingUIInstance;
 
+	UPROPERTY(BlueprintReadWrite)
 	bool bSettingUIOpen = false;
 
 // 포션 섹션

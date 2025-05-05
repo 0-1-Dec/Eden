@@ -234,8 +234,27 @@ void AECharacterBase::AttackHitCheck()
 	// 적중 시, 대상 액터에 데미지를 적용합니다.
 	if (HitDetected)
 	{
+		AECharacterBase* TargetCharacter = Cast<AECharacterBase>(OutHitResult.GetActor());
+		float TargetDefence = 0.0f;
+		if(TargetCharacter && TargetCharacter->Stat)
+		{
+			TargetDefence = TargetCharacter->Stat->GetDefense();
+		}
+
+		float MyCriticalChance = Stat->GetCriticalChance() * 0.01f;
+		float MyCriticalDamage = Stat->GetCriticalDamage() * 0.01f;
+		bool bIsCritical = FMath::FRand() <= MyCriticalChance;
+
+		float FinalDamage = AttackDamage - TargetDefence;
+		FinalDamage = FMath::Max(FinalDamage,1.0f); // 최소 1 데미지
+
+		if(bIsCritical)
+		{
+			FinalDamage *= MyCriticalDamage;
+		}
+
 		FDamageEvent DamageEvent;
-		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+		OutHitResult.GetActor()->TakeDamage(FinalDamage,DamageEvent,GetController(),this); //AttackDamage 대신 계산이 끝난 Final로 대체했음
 
 		if (GetController()->IsPlayerController() && CurrentWeaponData->Weapon == EWeaponType::BothHanded)
 		{
@@ -249,16 +268,17 @@ void AECharacterBase::AttackHitCheck()
 			);
 		}
 
+		FColor FloatColor = bIsCritical ? FColor::Yellow : (GetController()->IsPlayerController() ? FColor::Red : FColor(128,128,128,255));
 		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
 		if (GetController()->IsPlayerController())
 		{
-			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage, FColor::Red);	
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(FinalDamage,FloatColor);	
 		}
 		else
 		{
 			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,
 			                                            FRotator::ZeroRotator)->Init(
-				AttackDamage,FColor(128,128,128,255));
+				FinalDamage,FloatColor);
 		}
 		
 	}
