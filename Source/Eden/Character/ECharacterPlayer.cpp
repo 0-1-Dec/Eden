@@ -11,6 +11,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CharacterStat/ECharacterStatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 #include "Engine/OverlapResult.h"
 #include "Game/EGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -19,6 +20,7 @@
 #include "Item/EArrow.h"
 #include "Item/ESkillPathVFX.h"
 #include "Physics/ECollision.h"
+#include "UI/DamageFloatingText.h"
 #include "UI/EHUDWidget.h"
 
 AECharacterPlayer::AECharacterPlayer()
@@ -718,6 +720,62 @@ void AECharacterPlayer::ShootHomingArrow(APawn* Nearest)
 			}
 		}
 	}
+}
+
+void AECharacterPlayer::ExecuteOneSkill()
+{
+	// 충돌 정보를 저장할 변수
+	FHitResult OutHitResult;
+	// 콜리전 쿼리 파라미터 설정 (자신은 제외)
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	// 공격 범위, 반경, 그리고 데미지 값을 정의합니다.
+	const float AttackRange = CurrentWeaponData->AttackRange + 50.f;
+	const float AttackRadius = CurrentWeaponData->AttackRadius + 50.f;
+	//const float AttackDamage = CurrentWeaponData->BaseDamage; 기존 공격력 방식
+	const float AttackDamage = Stat->GetAttack() + CurrentWeaponData->BaseDamage + 30.f;
+
+	// 공격 시작 지점: 캐릭터 위치에 콜리전 캡슐 반경만큼 전진한 위치
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	// 공격 끝 지점: 시작 지점에서 추가로 전진한 위치
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	// 지정된 범위 내에서 스윕 충돌 검사를 수행합니다.
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, CCHANNEL_EACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	// 적중 시, 대상 액터에 데미지를 적용합니다.
+	if (HitDetected)
+	{
+		FDamageEvent DamageEvent;
+		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
+		
+		FVector SpawnLoc = OutHitResult.GetActor()->GetActorLocation() + FVector(0,0,100);
+		if (GetController()->IsPlayerController())
+		{
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,FRotator::ZeroRotator)->Init(AttackDamage, FColor::Red);	
+		}
+		else
+		{
+			GetWorld()->SpawnActor<ADamageFloatingText>(ADamageFloatingText::StaticClass(),SpawnLoc,
+			                                            FRotator::ZeroRotator)->Init(
+				AttackDamage,FColor(128,128,128,255));
+		}
+		
+	}
+
+	// 디버그 목적으로 공격 범위를 시각화합니다.
+#if ENABLE_DRAW_DEBUG
+
+	// 디버그 캡슐의 중심과 반 높이를 계산합니다.
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+	float CapsuleHalfHeight = AttackRange * 0.5f;
+	// 적중 여부에 따라 색상을 결정합니다 (적중: 초록, 미적중: 빨강).
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	// 캡슐 형태로 공격 범위를 디버그 드로잉합니다.
+	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+
+#endif
 }
 
 void AECharacterPlayer::ExecuteBothSkill()

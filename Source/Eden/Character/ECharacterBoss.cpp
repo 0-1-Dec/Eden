@@ -85,6 +85,7 @@ void AECharacterBoss::BeginPlay()
 	Super::BeginPlay();
 
 	Stat->SetMaxHp(3000.f);
+	Stat->HealUp(3000.f);
 
 	if (AEBossAIController* BossAIController = Cast<AEBossAIController>(GetController()))
 	{
