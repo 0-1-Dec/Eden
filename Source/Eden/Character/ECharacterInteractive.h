@@ -36,4 +36,8 @@ public:
 
 	// 외곽선 상태 저장
 	bool bOutlineOn = false;
+
+	//플레이어에게 반환할 위젯 블루프린트
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="UI")
+	UUserWidget* InteractWidgetBlueprint;
 };
