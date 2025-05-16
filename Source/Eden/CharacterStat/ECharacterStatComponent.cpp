@@ -172,6 +172,7 @@ FCharacterStatSnapshot UECharacterStatComponent::MakeStatSnapshot() const
 	Out.StatPoints          = StatPoints;
 
 	Out.CurrentHp           = CurrentHp;
+	Out.PotionCount			= Potion;
 
 	Out.BonusMaxHp          = BonusMaxHp;
 	Out.BonusAttack         = BonusAttack;
@@ -198,8 +199,10 @@ void UECharacterStatComponent::ApplyStatSnapshot(const FCharacterStatSnapshot& I
 
 	/* 실시간 값 – MaxHp 가 달라졌을 수 있으니 Clamp */
 	CurrentHp = FMath::Clamp(InSnapshot.CurrentHp, 0.f, GetMaxHp());
+	Potion =  InSnapshot.PotionCount;
 
 	/* UI 동기화를 위해 델리게이트 브로드캐스트 */
 	OnHpChanged.Broadcast(CurrentHp);
 	OnExpChanged.Broadcast(CurrentExp);
+	OnPotionCountChanged.Broadcast(Potion);
 }

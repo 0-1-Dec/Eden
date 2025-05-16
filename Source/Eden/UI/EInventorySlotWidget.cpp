@@ -5,6 +5,8 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Inventory/EInventoryDragDropOperation.h"
 #include "Character/ECharacterPlayer.h"
+#include "Components/GridPanel.h"
+#include "Components/GridSlot.h"
 
 void UEInventorySlotWidget::NativeConstruct()
 {
@@ -81,6 +83,11 @@ void UEInventorySlotWidget::UpdateSlotUI()
 		}
 		if (QuantityText)
 			QuantityText->SetText(FText::GetEmpty());
+
+		if (UGridSlot* GridSlot = Cast<UGridSlot>(IconImage->Slot))
+		{
+			GridSlot->SetPadding(FMargin(0.f));
+		}
 		return;
 	}
 	
@@ -92,6 +99,11 @@ void UEInventorySlotWidget::UpdateSlotUI()
 	if (QuantityText)
 	{
 		QuantityText->SetText(FText::AsNumber(SlotData.Quantity));
+	}
+
+	if (UGridSlot* GridSlot = Cast<UGridSlot>(IconImage->Slot))
+	{
+		GridSlot->SetPadding(FMargin(6.f));
 	}
 }
 

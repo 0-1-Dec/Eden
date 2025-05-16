@@ -16,6 +16,7 @@ public:
 
 	/* 실시간 값 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float  CurrentHp  = 200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) int32  PotionCount  = 5;
 
 	/* 보너스 스탯 */
 	UPROPERTY(EditAnywhere,BlueprintReadWrite) float  BonusMaxHp          = 0.f;

@@ -3,7 +3,7 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	OneHanded,
+	OneHanded = 0,
 	BothHanded,
 	Bow
 };

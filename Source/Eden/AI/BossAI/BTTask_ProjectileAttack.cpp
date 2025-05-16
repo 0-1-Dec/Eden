@@ -135,13 +135,13 @@ void UBTTask_ProjectileAttack::PredictAndDrawImpactPoint(UWorld* World, const FV
 	}
 
 	// 5) 디버그 스피어로 표시(다른 오브젝트 spawn으로 대채 가능)
-	DrawDebugSphere(
-		World,
-		ImpactPoint,
-		50.0f,       // 반경
-		16,          // 세그먼트
-		FColor::Red,
-		false,       // 지속 여부
-		4.0f         // 몇초 동안 표시할지
-	);
+	// DrawDebugSphere(
+	// 	World,
+	// 	ImpactPoint,
+	// 	50.0f,       // 반경
+	// 	16,          // 세그먼트
+	// 	FColor::Red,
+	// 	false,       // 지속 여부
+	// 	4.0f         // 몇초 동안 표시할지
+	// );
 }

@@ -15,6 +15,7 @@ DECLARE_MULTICAST_DELEGATE(FLevelChangedDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpGainDelegate, float /*InExp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnExpChangedDelegate, float /*InExp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate,float /*NewHp*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPotionCountChangedDelegate, int32 /*InExp*/);
 
 // UECharacterStatComponent 클래스는 캐릭터의 스탯(예: HP, 공격 사거리 등)을 관리하는 컴포넌트입니다.
 // Blueprint에서 스폰이 가능하도록 meta 설정을 포함하고 있습니다.
@@ -45,6 +46,8 @@ public:
 
 	FLevelChangedDelegate OnLevelChanged;
 
+	FOnPotionCountChangedDelegate OnPotionCountChanged;
+
 	// 인라인 함수: 현재 HP 값을 반환합니다.
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
 
@@ -67,8 +70,6 @@ protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float AttackRadius;
 
-	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
-	float Energy;
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Level)
 	int32 CurrentLevel = 1;
@@ -77,6 +78,9 @@ protected:
 	float CurrentExp = 0;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	int32 Potion = 5;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	float BaseMaxHp = 200.0f;
 
@@ -129,41 +133,31 @@ public:
 	FORCEINLINE void SetMaxHp(float NewMaxHp) { BaseMaxHp = NewMaxHp; }
 	
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetAttack(float NewAttack) {BaseAttack = NewAttack;}
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetDefense(float NewDefense) {BaseDefence = NewDefense;}
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetCriticalChance(float NewCriticalChance) {BaseCriticalChance = NewCriticalChance;}
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetCriticalDamage(float NewCriticalDamage) {BaseCriticalDamage = NewCriticalDamage;}
-
-
-	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetCurrentLevel() const { return CurrentLevel; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float  GetCurrentExp() const { return CurrentExp; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetCurrentEnergy() const { return Energy; }
-
-	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetMaxHp() const { return BaseMaxHp + BonusMaxHp * 10; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetAttack() const {return BaseAttack + BonusAttack * 5;}
+	FORCEINLINE float GetAttack() const {return BaseAttack + BonusAttack * 5; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetDefense() const {return BaseDefence + BonusDefence * 3;}
+	FORCEINLINE float GetDefense() const {return BaseDefence + BonusDefence * 3; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE float GetCriticalChance() const {return BaseCriticalChance + BonusCriticalChance;}
+	FORCEINLINE float GetCriticalChance() const {return BaseCriticalChance + BonusCriticalChance; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE float GetCriticalDamage() const { return BaseCriticalDamage + BonusCriticalDamage * 10; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetPotion() const { return Potion; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPotion(float _Count) { Potion += _Count; OnPotionCountChanged.Broadcast(Potion); }
 	
 	UFUNCTION(BlueprintCallable)
 	void HealUp(float Amount); 
@@ -176,8 +170,7 @@ public:
 		FinalCriticalChance = GetCriticalChance();
 		FinalCriticalDamage = GetCriticalDamage();
 	}
-
-
+	
 // 경험치 섹션
 public:
 	UFUNCTION(BlueprintCallable)
