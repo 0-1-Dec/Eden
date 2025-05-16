@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "ECharacterPlayer.h"
 
 // Sets default values
 AECharacterInteractive::AECharacterInteractive()
@@ -31,6 +32,7 @@ void AECharacterInteractive::Tick(float DeltaTime)
 
     FVector MyLocation = GetActorLocation();
     ACharacter* ClosestPlayer = nullptr;
+    AECharacterPlayer* Player = nullptr;
     float MinDistSq = SenseRadius * SenseRadius;
     float ClosestDistSq = FLT_MAX;
 
@@ -49,6 +51,7 @@ void AECharacterInteractive::Tick(float DeltaTime)
                     MinDistSq = DistSq;
                     ClosestPlayer = PlayerChar;
                     ClosestDistSq = DistSq;
+                    Player = Cast<AECharacterPlayer>(ClosestPlayer);
                 }
             }
         }
@@ -73,17 +76,23 @@ void AECharacterInteractive::Tick(float DeltaTime)
                 MeshComp->SetRenderCustomDepth(true);
                 MeshComp->SetCustomDepthStencilValue(1);
                 bOutlineOn = true;
+                if(Player) Player->CurrentInteractableActor = this;
             }
         } else
         {
             if(bOutlineOn)
             {
+                if(Player){
+                    Player->CurrentInteractableActor = nullptr;
+                    if(Player->bInteractionUIOpen) Player->UseInteraction();
+                }
                 MeshComp->SetRenderCustomDepth(false);
                 bOutlineOn = false;
             }
         }
     } else
     {
+        Player = nullptr;
         // 플레이어가 없으면 외곽선 꺼짐
         if(bOutlineOn)
         {
