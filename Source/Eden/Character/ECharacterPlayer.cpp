@@ -22,6 +22,7 @@
 #include "Physics/ECollision.h"
 #include "UI/DamageFloatingText.h"
 #include "UI/EHUDWidget.h"
+#include "Character/ECharacterInteractive.h"
 
 AECharacterPlayer::AECharacterPlayer()
 {
@@ -148,6 +149,12 @@ AECharacterPlayer::AECharacterPlayer()
 		ShowCursorAction = ShowCursorRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteractRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Interact.IA_Interact'"));
+	if(nullptr != InputInteractRef.Object)
+	{
+		InteractAction = InputInteractRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> OneHand_WeaponMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/PostApocalypticMeleeWeapons/Meshes/SK_ShivGlass.SK_ShivGlass'"));
 	if (OneHand_WeaponMeshRef.Object)
 	{
@@ -265,6 +272,8 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// 세팅 메뉴
 	EnhancedInputComponent->BindAction(OpenSettingAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleSettingUI);
 	EnhancedInputComponent->BindAction(ShowCursorAction,ETriggerEvent::Started,this,&AECharacterPlayer::ShowCursor);
+	// 상호작용
+	EnhancedInputComponent->BindAction(InteractAction,ETriggerEvent::Started,this,&AECharacterPlayer::UseInteraction);
 }
 
 void AECharacterPlayer::Move(const FInputActionValue& Value)
@@ -951,4 +960,57 @@ void AECharacterPlayer::DrinkPotion()
 
 	Stat->HealUp(50.f);
 	Stat->SetPotion(-1);
+}
+
+void AECharacterPlayer::UseInteraction()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+
+	// UI를 닫을 때
+	if(bInteractionUIOpen)
+	{
+		if(InteractionWidgetInstance)
+		{
+			InteractionWidgetInstance->RemoveFromParent();
+			bInteractionUIOpen = false;
+
+			FInputModeGameOnly InputMode;
+			if(PC)
+			{
+				PC->SetInputMode(InputMode);
+				PC->bShowMouseCursor = false;
+			}
+			// 액터가 없으면 위젯 인스턴스도 null로
+			if(!CurrentInteractableActor)
+			{
+				InteractionWidgetInstance = nullptr;
+			}
+		}
+	}
+	// UI를 열 때 (여기서 반드시 CurrentInteractableActor가 유효한지 체크)
+	else
+	{
+		if(CurrentInteractableActor)
+		{
+			AECharacterInteractive* Interactable = Cast<AECharacterInteractive>(CurrentInteractableActor);
+			if(Interactable && Interactable->InteractWidgetBlueprint)
+			{
+				InteractionWidgetInstance = Interactable->InteractWidgetBlueprint;
+				InteractionWidgetInstance->AddToViewport();
+				bInteractionUIOpen = true;
+
+				FInputModeGameAndUI InputMode;
+				if(PC)
+				{
+					InputMode.SetWidgetToFocus(InteractionWidgetInstance->TakeWidget());
+					PC->SetInputMode(InputMode);
+					PC->bShowMouseCursor = true;
+				}
+			}
+		} else
+		{
+			// 상호작용 대상이 없으면 열지 않음
+			InteractionWidgetInstance = nullptr;
+		}
+	}
 }

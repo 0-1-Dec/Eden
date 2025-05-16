@@ -92,6 +92,7 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ShowCursorAction;
+	TObjectPtr<class UInputAction> InteractAction;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -259,4 +260,19 @@ protected:
 // 포션 섹션
 protected:
 	void DrinkPotion();
+
+//상호작용 섹션
+public:
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
+	TSubclassOf<UUserWidget> InteractionWidgetClass;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	AActor* CurrentInteractableActor = nullptr;
+
+	UPROPERTY()
+	UUserWidget* InteractionWidgetInstance;
+
+	bool bInteractionUIOpen = false;
+
+	void UseInteraction();
 };
