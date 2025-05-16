@@ -49,6 +49,10 @@ void AECharacterNonPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	Stat->SetMaxHp(100.f);
+	if (Stat->GetMaxHp() - Stat->GetCurrentHp() <= 0)
+	{
+		Stat->HealUp(Stat->GetMaxHp() - Stat->GetCurrentHp());
+	}
 }
 
 void AECharacterNonPlayer::Tick(float DeltaSeconds)
@@ -77,8 +81,6 @@ void AECharacterNonPlayer::PostInitializeComponents()
 		FSoftObjectPath DataPath = NPCDataAsset.ToSoftObjectPath();
 		NPCDataHandle = UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(DataPath, FStreamableDelegate::CreateUObject(this, &AECharacterNonPlayer::OnNPCDataLoaded));
 	}
-	
-	Stat->SetMaxHp(100.f);
 }
 
 void AECharacterNonPlayer::SetDead()

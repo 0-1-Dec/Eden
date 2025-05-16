@@ -14,6 +14,8 @@
 #include "UI/EStatPanelWidget.h"
 #include "ECharacterPlayer.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnergyChangedDelegate,float /*NewHp*/);
+
 /**
  * 
  */
@@ -89,6 +91,7 @@ protected:
 	TObjectPtr<class UInputAction> DrinkPotionAction;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = Input,Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ShowCursorAction;
 	TObjectPtr<class UInputAction> InteractAction;
 
 	void Move(const FInputActionValue& Value);
@@ -221,18 +224,6 @@ protected:
 	
 	virtual void SetupHUDWidget(class UEHUDWidget* InHUDWidget) override;
 
-//스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
-public:
-	void ToggleStatUI();
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
-	TSubclassOf<UEStatPanelWidget> StatPanelWidgetClass;
-
-	UPROPERTY()
-	UEStatPanelWidget* StatPanelWidgetInstance;
-
-	bool bStatPanelOpen = false;
-
 	UFUNCTION(BlueprintCallable)
 	void ToggleSettingUI();
 
@@ -244,6 +235,27 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bSettingUIOpen = false;
+
+	bool bStatPanelOpen = false;
+
+	UPROPERTY()
+	UEStatPanelWidget* StatPanelWidgetInstance;
+
+	void ShowCursor();
+
+//스탯 섹션 (StatComponent는 Base의 공통컴포넌트로 생략)
+public:
+	void ToggleStatUI();
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category = UI)
+	TSubclassOf<UEStatPanelWidget> StatPanelWidgetClass;
+
+	FOnEnergyChangedDelegate OnEnergyChangedDelegate;
+
+protected:
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat)
+	float Energy = 100.f;
 
 // 포션 섹션
 protected:

@@ -39,22 +39,22 @@ void AEAoEActor::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(DamageTimerHandle, this, &AEAoEActor::ApplyContinuousDamage, 1.0f, true);
 
-#if ENABLE_DRAW_DEBUG
-	// SphereComponent의 실제 반경 계산 (월드 스케일 반영)
-	float SphereRadius = CollisionComponent->GetScaledSphereRadius();
-	
-	DrawDebugSphere(
-		GetWorld(),
-		GetActorLocation(),
-		SphereRadius,
-		16,
-		FColor::Green,
-		false,       // false: 일정 시간 후 사라짐
-		LifeTime,    // 이 AoEActor가 사라질 때까지 표시
-		0,
-		2.0f         // 선 두께
-	);
-#endif
+// #if ENABLE_DRAW_DEBUG
+// 	// SphereComponent의 실제 반경 계산 (월드 스케일 반영)
+// 	float SphereRadius = CollisionComponent->GetScaledSphereRadius();
+// 	
+// 	DrawDebugSphere(
+// 		GetWorld(),
+// 		GetActorLocation(),
+// 		SphereRadius,
+// 		16,
+// 		FColor::Green,
+// 		false,       // false: 일정 시간 후 사라짐
+// 		LifeTime,    // 이 AoEActor가 사라질 때까지 표시
+// 		0,
+// 		2.0f         // 선 두께
+// 	);
+// #endif
 }
 
 void AEAoEActor::EndPlay(const EEndPlayReason::Type EndPlayReason)

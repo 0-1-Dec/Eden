@@ -187,7 +187,7 @@ void AECharacterBoss::CloseAttackHitCheck()
 	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
 
 	// 캡슐 형태로 공격 범위를 디버그 드로잉합니다.
-	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+	// DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
 
 #endif
 }

@@ -18,6 +18,9 @@ void UEHUDWidget::NativeConstruct()
 
 	HpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("HpVerticalBar")));
 	ensure(HpProgressBar);
+	
+	EnergyProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("EnergyVerticalBar")));
+	ensure(EnergyProgressBar);
 
 	ExpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("ExpVerticalBar")));
 	ensure(ExpProgressBar);
@@ -28,12 +31,19 @@ void UEHUDWidget::NativeConstruct()
 	SkillCoolDownImg = Cast<UImage>(GetWidgetFromName(TEXT("SkillCoolDown")));
 	ensure(SkillCoolDownImg);
 
+	PotionCountText = Cast<UTextBlock>(GetWidgetFromName(TEXT("PotionCountText")));
+	ensure(PotionCountText);
+
 	SkillImg->SetBrushFromTexture(OneSkillIcon);
 
 	if (IECharacterHUDInterface* HUDPawn = Cast<IECharacterHUDInterface>(GetOwningPlayerPawn()))
 	{
 		HUDPawn->SetupHUDWidget(this);
 	}
+	
+	SkillImg->SetToolTipText(FText::FromString(OneSkillTooltip));
+	
+	HpProgressBar->SetToolTipText(FText::FromString(HpTooltip));
 }
 
 void UEHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -75,9 +85,23 @@ void UEHUDWidget::UpdateHpBar(float NewCurrentHp)
 	MaxHp = CurrentStatComp->GetMaxHp();
 	CurrentHp = NewCurrentHp;
 	
+	HpTooltip = FString::Printf(TEXT("체력 : %.1f / %.1f"), CurrentHp, MaxHp);
+	
 	if (HpProgressBar)
 	{
 		HpProgressBar->SetPercent(CurrentHp / MaxHp);
+
+		HpProgressBar->SetToolTipText(FText::FromString(HpTooltip));
+	}
+}
+
+void UEHUDWidget::UpdateEnergyBar(float NewCurrentEnergy)
+{
+	CurrentEnergy = NewCurrentEnergy;
+
+	if (EnergyProgressBar)
+	{
+		EnergyProgressBar->SetPercent(CurrentEnergy / MaxEnergy);
 	}
 }
 
@@ -97,19 +121,30 @@ void UEHUDWidget::UpdateLevel()
 	CurrentLevel++;
 }
 
+void UEHUDWidget::UpdatePotionCount(int32 NewPotionCount)
+{
+	PotionCountText->SetText(FText::AsNumber(NewPotionCount));
+}
+
 void UEHUDWidget::UpdateSkillIcon(EWeaponType CurrentWeapon)
 {
 	if (CurrentWeapon == EWeaponType::OneHanded)
 	{
 		SkillImg->SetBrushFromTexture(OneSkillIcon);
+		
+		SkillImg->SetToolTipText(FText::FromString(OneSkillTooltip));
 	}
 	else if (CurrentWeapon == EWeaponType::BothHanded)
 	{
 		SkillImg->SetBrushFromTexture(BothSkillIcon);
+
+		SkillImg->SetToolTipText(FText::FromString(BothSkillTooltip));
 	}
 	else
 	{
 		SkillImg->SetBrushFromTexture(BowSkillIcon);
+
+		SkillImg->SetToolTipText(FText::FromString(BowSkillTooltip));
 	}
 }
 

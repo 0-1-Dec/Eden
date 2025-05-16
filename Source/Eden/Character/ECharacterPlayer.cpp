@@ -142,6 +142,12 @@ AECharacterPlayer::AECharacterPlayer()
 	{
 		DrinkPotionAction = InputPotionRef.Object;
 	}
+	
+	static ConstructorHelpers::FObjectFinder<UInputAction> ShowCursorRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Cursor.IA_Cursor'"));
+	if(nullptr != ShowCursorRef.Object)
+	{
+		ShowCursorAction = ShowCursorRef.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputInteractRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Eden/Input/Actions/IA_Interact.IA_Interact'"));
 	if(nullptr != InputInteractRef.Object)
@@ -220,6 +226,12 @@ void AECharacterPlayer::Tick(float DeltaTime)
 	const float CurrentFOV = FollowCamera->FieldOfView;
 	const float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, DeltaTime, ZoomSpeed);
 
+	if (Energy < 100.f)
+	{
+		Energy += 0.1f;
+		OnEnergyChangedDelegate.Broadcast(Energy);
+	}
+
 	FollowCamera->SetFieldOfView(NewFOV);
 }
 
@@ -259,7 +271,7 @@ void AECharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	// 세팅 메뉴
 	EnhancedInputComponent->BindAction(OpenSettingAction,ETriggerEvent::Started,this,&AECharacterPlayer::ToggleSettingUI);
-
+	EnhancedInputComponent->BindAction(ShowCursorAction,ETriggerEvent::Started,this,&AECharacterPlayer::ShowCursor);
 	// 상호작용
 	EnhancedInputComponent->BindAction(InteractAction,ETriggerEvent::Started,this,&AECharacterPlayer::UseInteraction);
 }
@@ -300,9 +312,16 @@ void AECharacterPlayer::Dodge(const FInputActionValue& Value)
 	{
 		return;
 	}
-	
+
+	if (Energy < 20.f)
+	{
+		return;
+	}
+
+	Energy -= 20.f;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(DodgeMontage);
+	OnEnergyChangedDelegate.Broadcast(Energy);
 }
 
 void AECharacterPlayer::TryBowChargeStart()
@@ -818,11 +837,23 @@ void AECharacterPlayer::SetupHUDWidget(class UEHUDWidget* InHUDWidget)
 		
 		InHUDWidget->BindStatComponent(Stat);
 		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+		InHUDWidget->UpdateEnergyBar(Energy);
 		InHUDWidget->UpdateExpBar(Stat->GetCurrentExp());
+		InHUDWidget->UpdatePotionCount(Stat->GetPotion());
 		Stat->OnHpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateHpBar);
 		Stat->OnExpChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateExpBar);
 		Stat->OnLevelChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdateLevel);
+		OnEnergyChangedDelegate.AddUObject(InHUDWidget, &UEHUDWidget::UpdateEnergyBar);
 		OnWeaponDataChanged.AddDynamic(InHUDWidget, &UEHUDWidget::UpdateSkillIcon);
+		Stat->OnPotionCountChanged.AddUObject(InHUDWidget, &UEHUDWidget::UpdatePotionCount);
+	}
+}
+
+void AECharacterPlayer::ShowCursor()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->bShowMouseCursor = true;
 	}
 }
 
@@ -834,6 +865,9 @@ void AECharacterPlayer::ToggleStatUI()
 		if(PC)
 		{
 			StatPanelWidgetInstance = CreateWidget<UEStatPanelWidget>(PC,StatPanelWidgetClass);
+			
+			StatPanelWidgetInstance->AddToViewport();
+			StatPanelWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 		}
 
 		StatPanelWidgetInstance->BindStatComponent(Stat.Get());
@@ -844,7 +878,7 @@ void AECharacterPlayer::ToggleStatUI()
 	{
 		if(bStatPanelOpen)
 		{
-			StatPanelWidgetInstance->RemoveFromParent();
+			StatPanelWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 			bStatPanelOpen = false;
 
 			FInputModeGameOnly InputMode;
@@ -852,7 +886,7 @@ void AECharacterPlayer::ToggleStatUI()
 			PC->bShowMouseCursor = false;
 		} else
 		{
-			StatPanelWidgetInstance->AddToViewport();
+			StatPanelWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 			bStatPanelOpen = true;
 
 			FInputModeGameAndUI InputMode;
@@ -867,16 +901,41 @@ void AECharacterPlayer::ToggleSettingUI(){
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	if(!PC) return;
 
+	if (bInventoryOpen && !bSettingUIOpen && InventoryWidgetInstance)
+	{
+		InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		bInventoryOpen = false;
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+		return;
+	}
+
+	if (bStatPanelOpen && !bSettingUIOpen && StatPanelWidgetInstance)
+	{
+		StatPanelWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		bStatPanelOpen = false;
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+		return;
+	}
+
 	if(!SettingUIInstance && SettingUIClass)
 	{
 		SettingUIInstance = CreateWidget<UUserWidget>(PC,SettingUIClass);
+
+		SettingUIInstance->AddToViewport();
+		SettingUIInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if(!SettingUIInstance) return;
 
 	if(bSettingUIOpen)
 	{
-		SettingUIInstance->RemoveFromParent();
+		SettingUIInstance->SetVisibility(ESlateVisibility::Hidden);
 		bSettingUIOpen = false;
 
 		FInputModeGameOnly InputMode;
@@ -884,7 +943,7 @@ void AECharacterPlayer::ToggleSettingUI(){
 		PC->bShowMouseCursor = false;
 	} else
 	{
-		SettingUIInstance->AddToViewport();
+		SettingUIInstance->SetVisibility(ESlateVisibility::Visible);
 		bSettingUIOpen = true;
 
 		FInputModeGameAndUI InputMode;
@@ -896,10 +955,11 @@ void AECharacterPlayer::ToggleSettingUI(){
 
 void AECharacterPlayer::DrinkPotion()
 {
+	if (Stat->GetPotion() <= 0)
+		return;
+
 	Stat->HealUp(50.f);
-	/*
-	 * 포션 수량 부분 추가 예정
-	 */
+	Stat->SetPotion(-1);
 }
 
 void AECharacterPlayer::UseInteraction()

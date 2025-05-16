@@ -100,10 +100,10 @@ void UBTTask_WideAoE::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 				UGameplayStatics::ApplyDamage(Target, 100.f, AIController, ControllingPawn, nullptr);
 			}
 		}
-
-#if ENABLE_DRAW_DEBUG
-		DrawDebugSphere(GetWorld(), ControllingPawn->GetActorLocation(), AoERadius, 32, FColor::Red, false, 2.0f);
-#endif
+//
+// #if ENABLE_DRAW_DEBUG
+// 		DrawDebugSphere(GetWorld(), ControllingPawn->GetActorLocation(), AoERadius, 32, FColor::Red, false, 2.0f);
+// #endif
 
 		bHasExploded = true;
 

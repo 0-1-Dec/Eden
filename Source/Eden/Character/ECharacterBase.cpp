@@ -282,20 +282,20 @@ void AECharacterBase::AttackHitCheck()
 		}
 		
 	}
-
-	// 디버그 목적으로 공격 범위를 시각화합니다.
-#if ENABLE_DRAW_DEBUG
-
-	// 디버그 캡슐의 중심과 반 높이를 계산합니다.
-	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
-	float CapsuleHalfHeight = AttackRange * 0.5f;
-	// 적중 여부에 따라 색상을 결정합니다 (적중: 초록, 미적중: 빨강).
-	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
-
-	// 캡슐 형태로 공격 범위를 디버그 드로잉합니다.
-	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
-
-#endif
+//
+// 	// 디버그 목적으로 공격 범위를 시각화합니다.
+// #if ENABLE_DRAW_DEBUG
+//
+// 	// 디버그 캡슐의 중심과 반 높이를 계산합니다.
+// 	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+// 	float CapsuleHalfHeight = AttackRange * 0.5f;
+// 	// 적중 여부에 따라 색상을 결정합니다 (적중: 초록, 미적중: 빨강).
+// 	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+//
+// 	// 캡슐 형태로 공격 범위를 디버그 드로잉합니다.
+// 	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+//
+// #endif
 }
 
 // TakeDamage: 캐릭터가 데미지를 받을 때 호출되는 함수입니다.

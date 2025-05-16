@@ -131,20 +131,20 @@ void UBTTask_CastingBreath::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* N
 			const FVector BreathOrigin = BossCharcter->GetMesh()->GetSocketLocation(TEXT("MouthSocket"));
 			const FVector ForwardDir = BossCharcter->GetActorForwardVector();
 
-#if ENABLE_DRAW_DEBUG
-			DrawDebugCone(
-				Boss->GetWorld(),
-				BreathOrigin,
-				ForwardDir,
-				Range,
-				FMath::DegreesToRadians(Angle),
-				FMath::DegreesToRadians(Angle),
-				12,
-				FColor::Red,
-				false,
-				0.1f  // Tick마다 재그리면 0.1초면 충분
-			);
-#endif
+// #if ENABLE_DRAW_DEBUG
+// 			DrawDebugCone(
+// 				Boss->GetWorld(),
+// 				BreathOrigin,
+// 				ForwardDir,
+// 				Range,
+// 				FMath::DegreesToRadians(Angle),
+// 				FMath::DegreesToRadians(Angle),
+// 				12,
+// 				FColor::Red,
+// 				false,
+// 				0.1f  // Tick마다 재그리면 0.1초면 충분
+// 			);
+// #endif
 			
 			TArray<AActor*> AllTargets;
 			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), AllTargets);
