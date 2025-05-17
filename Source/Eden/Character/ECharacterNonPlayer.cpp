@@ -253,6 +253,7 @@ void AECharacterNonPlayer::HandleDrop()
 		if(UECharacterStatComponent* StatComponent = Player->FindComponentByClass<UECharacterStatComponent>())
 		{
 			StatComponent->OnExpGain.Broadcast(DropData->Exp);
+			Player->InventoryComponent->gold += 100;
 			//StatComponent->OnGoldGain.Broadcast(DropData->Gold); // 나중에 골드 추가 시 사용
 		}
 	}
