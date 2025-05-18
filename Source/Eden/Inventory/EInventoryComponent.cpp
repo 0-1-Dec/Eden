@@ -209,3 +209,64 @@ void UEInventoryComponent::InitFromArray(const TArray<FEInventorySlot>& InSlots)
 
 	OnInventoryChanged.Broadcast();
 }
+
+int32 UEInventoryComponent::FindItemSlotIndex(UEItemDataAsset* ItemData) const
+{
+    if (!ItemData) return INDEX_NONE;
+
+    for (int32 i = 0; i < Slots.Num(); ++i)
+    {
+        if (Slots[i].ItemData == ItemData && Slots[i].Quantity > 0)
+        {
+            return i;
+        }
+    }
+    return INDEX_NONE;
+}
+
+bool UEInventoryComponent::RemoveItemAuto(UEItemDataAsset* ItemData, int32 Quantity)
+{
+	if(!ItemData || Quantity <= 0)
+		return false;
+
+	int32 QuantityToRemove = Quantity;
+
+	for(int32 i = 0; i < Slots.Num(); ++i)
+	{
+		if(Slots[i].ItemData == ItemData && Slots[i].Quantity > 0)
+		{
+			if(Slots[i].Quantity >= QuantityToRemove)
+			{
+				Slots[i].Quantity -= QuantityToRemove;
+				if(Slots[i].Quantity == 0)
+				{
+					Slots[i].ItemData = nullptr;
+				}
+				OnInventoryChanged.Broadcast();
+				return true;
+			} else
+			{
+				QuantityToRemove -= Slots[i].Quantity;
+				Slots[i].Quantity = 0;
+				Slots[i].ItemData = nullptr;
+			}
+		}
+	}
+
+	OnInventoryChanged.Broadcast();
+	return (QuantityToRemove == 0);
+}
+
+int32 UEInventoryComponent::CountItem(UEItemDataAsset* ItemData) const
+{
+	if(!ItemData) return 0;
+	int32 TotalCount = 0;
+	for(const FEInventorySlot& Slot : Slots)
+	{
+		if(Slot.ItemData == ItemData)
+		{
+			TotalCount += Slot.Quantity;
+		}
+	}
+	return TotalCount;
+}

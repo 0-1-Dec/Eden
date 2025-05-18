@@ -64,4 +64,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void InitFromArray(const TArray<FEInventorySlot>& InSlots);
+
+// 거래, 제작 섹션
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = Inventory)
+	int gold = 0;
+
+	UFUNCTION(BlueprintCallable,Category=Inventory)
+	int32 FindItemSlotIndex(UEItemDataAsset* ItemData) const;
+
+	UFUNCTION(BlueprintCallable,Category=Inventory)
+	bool RemoveItemAuto(UEItemDataAsset* ItemData,int32 Quantity);
+
+	UFUNCTION(BlueprintCallable,Category=Inventory)
+	int32 CountItem(UEItemDataAsset* ItemData) const;
 };
